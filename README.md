@@ -24,95 +24,33 @@ STAFF:
 - NHẬN TIỀN THEO PHẦN MỀM HIỂN THỊ
 - CHECK TIỀN THEO CA
 
+## Yêu cầu về các page
+- PAGE login
+- PAGE admin/manager 
+- PAGE nhân viên
+
+
 ## Yêu cầu cơ sở dữ liệu 
 - VAI TRÒ, CA LÀM VIỆC KIỂU EMU
+- Cần có bảng cho vai trò người dùng và bảng cho ca làm việc, với các quan hệ rõ ràng để quản lý quyền truy cập.
 
-## Yêu cầu xử lí ngoại lệ
+## Yêu cầu xử lí
+- DÙNG CHUNG MỘT GIAO DIỆN LOGIN, ĐƯỢC ĐƯA VỀ PAGE TƯƠNG ỨNG VỚI ROLE, RIÊNG admin/manger CHUNG PAGE CHỈ LÀ NỘI DUNG HIỂN THỊ CỦA MANAGER BỊ HẠN CHẾ
 - CHECK DOANH THU THEO CA ĐƯỢC CHỌN CA TRONG NGÀY NÀO
 - CHECK LỢI NHUẬN THEO CA ĐƯỢC CHỌN CA TRONG NGÀY NÀO
+
+## Yêu cầu về giao diện
+- Page Login:
+Tạo một form đăng nhập duy nhất cho tất cả người dùng. Sau khi đăng nhập, người dùng sẽ được chuyển đến trang tương ứng dựa trên vai trò của họ.
+
+- Page Admin/Manager:
+Dùng chung một giao diện, nhưng nội dung sẽ bị hạn chế cho manager. Nên sử dụng các thẻ điều kiện để kiểm tra vai trò và hiển thị nội dung phù hợp.
+Page Nhân Viên:
+
+- Tạo giao diện cho nhân viên để tìm kiếm sản phẩm và ghi nhận doanh thu theo ca.
 
 ## Yêu cầu công nghệ
 
 -   DÙNG LAVAVEL PHP 
 -   LƯU TRỮ CODE TRÊN GITHUB (https://github.com/wasabixxx/pmhtBanHang)
-
-## Config database SQL
--- Tạo cơ sở dữ liệu
-CREATE DATABASE QuanLyBanHang;
-USE QuanLyBanHang;
-
--- Tạo bảng cho nhân viên với phân quyền
-CREATE TABLE nhan_vien (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    ten NVARCHAR(50),
-    tai_khoan VARCHAR(50) UNIQUE,
-    mat_khau VARCHAR(255),
-    vai_tro ENUM('ADMIN', 'MANAGER', 'STAFF') NOT NULL,
-    ca_lam_viec ENUM('SANG', 'CHIEU', 'TOI') NOT NULL
-);
-
--- Tạo bảng sản phẩm trong kho
-CREATE TABLE san_pham (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    ten_san_pham NVARCHAR(100) NOT NULL,
-    gia_ban DECIMAL(10, 2) NOT NULL,
-    gia_nhap DECIMAL(10, 2) NOT NULL,
-    so_luong INT DEFAULT 0,
-    ngay_cap_nhat TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-
--- Tạo bảng hóa đơn bán hàng
-CREATE TABLE hoa_don (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    id_nhan_vien INT,
-    thoi_gian_ban TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    tong_tien DECIMAL(10, 2),
-    ca_lam_viec ENUM('SANG', 'CHIEU', 'TOI') NOT NULL,
-    FOREIGN KEY (id_nhan_vien) REFERENCES nhan_vien(id)
-);
-
--- Tạo bảng chi tiết hóa đơn để lưu thông tin các sản phẩm trong từng hóa đơn
-CREATE TABLE chi_tiet_hoa_don (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    id_hoa_don INT,
-    id_san_pham INT,
-    so_luong INT,
-    gia_ban DECIMAL(10, 2),
-    FOREIGN KEY (id_hoa_don) REFERENCES hoa_don(id),
-    FOREIGN KEY (id_san_pham) REFERENCES san_pham(id)
-);
-
--- Bảng theo dõi tồn kho
-CREATE TABLE ton_kho (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    id_san_pham INT,
-    so_luong INT,
-    ngay_cap_nhat TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (id_san_pham) REFERENCES san_pham(id)
-);
-
--- Tạo bảng doanh thu để lưu doanh thu theo ca và ngày
-CREATE TABLE doanh_thu (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    ngay DATE NOT NULL,
-    ca_lam_viec ENUM('SANG', 'CHIEU', 'TOI') NOT NULL,
-    tong_doanh_thu DECIMAL(10, 2),
-    tong_loi_nhuan DECIMAL(10, 2)
-);
-
--- Bảng phân quyền (cho phép ADMIN, MANAGER và STAFF truy cập các chức năng tương ứng)
-CREATE TABLE phan_quyen (
-    vai_tro ENUM('ADMIN', 'MANAGER', 'STAFF') PRIMARY KEY,
-    quan_ly_tai_khoan BOOLEAN DEFAULT FALSE,
-    quan_ly_kho BOOLEAN DEFAULT FALSE,
-    xem_doanh_thu BOOLEAN DEFAULT FALSE,
-    xem_loi_nhuan BOOLEAN DEFAULT FALSE,
-    xem_ton_kho BOOLEAN DEFAULT FALSE
-);
-
--- Thêm dữ liệu phân quyền ban đầu
-INSERT INTO phan_quyen (vai_tro, quan_ly_tai_khoan, quan_ly_kho, xem_doanh_thu, xem_loi_nhuan, xem_ton_kho)
-VALUES 
-    ('ADMIN', TRUE, TRUE, TRUE, TRUE, TRUE),
-    ('MANAGER', FALSE, TRUE, TRUE, FALSE, TRUE),
-    ('STAFF', FALSE, FALSE, FALSE, FALSE, FALSE);
+-   HỆ QUẢN TRỊ CƠ SỞ DỮ LIỆU SQLITE
