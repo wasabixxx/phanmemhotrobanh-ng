@@ -1,0 +1,40 @@
+# Hướng dẫn cấu hình cho lần đầu tiên chạy project nha mấy th ngu 
+
+ Bảng Users
+id: Khóa chính, định danh người dùng.
+username: Tên đăng nhập của người dùng.
+password: Mật khẩu (nên lưu mã hóa).
+role_id: Liên kết đến bảng Roles (quản lý quyền).
+shift_id: Liên kết đến bảng Shifts (quản lý ca làm việc).
+name: Tên nhân viên.
+phone: Số điện thoại liên hệ.
+email: Địa chỉ email của nhân viên.
+2. Bảng Roles
+id: Khóa chính.
+name: Tên vai trò (admin, manager, staff).
+3. Bảng Shifts
+id: Khóa chính.
+name: Tên ca làm việc (ví dụ: "Ca sáng", "Ca chiều").
+start_time: Thời gian bắt đầu ca làm việc.
+end_time: Thời gian kết thúc ca làm việc.
+4. Bảng Products
+id: Khóa chính.
+name: Tên sản phẩm.
+price: Giá bán sản phẩm.
+cost_price: Giá nhập sản phẩm.
+quantity: Số lượng tồn kho.
+created_at: Thời điểm tạo sản phẩm.
+updated_at: Thời điểm cập nhật sản phẩm.
+5. Bảng Sales
+id: Khóa chính.
+product_id: Liên kết đến bảng Products (quản lý sản phẩm).
+user_id: Liên kết đến bảng Users (nhân viên bán hàng).
+shift_id: Liên kết đến bảng Shifts (ca làm việc của nhân viên khi bán hàng).
+quantity: Số lượng sản phẩm bán.
+total_price: Tổng tiền bán = price * quantity.
+profit: Lợi nhuận = total_price - (cost_price * quantity).
+created_at: Thời điểm giao dịch.
+6. Quan hệ giữa các bảng
+Users và Roles: Quan hệ 1-n, một người dùng có một vai trò, mỗi vai trò có nhiều người dùng.
+Users và Shifts: Quan hệ 1-n, một người dùng thuộc một ca làm việc, mỗi ca có thể có nhiều người dùng.
+Sales với Products, Users, và Shifts: Quan hệ n-1, mỗi giao dịch bán hàng thuộc một sản phẩm, một nhân viên, và một ca làm việc cụ thể.
