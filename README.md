@@ -53,4 +53,4 @@ Page Nhân Viên:
 
 -   DÙNG LAVAVEL PHP 
 -   LƯU TRỮ CODE TRÊN GITHUB (https://github.com/wasabixxx/pmhtBanHang)
--   HỆ QUẢN TRỊ CƠ SỞ DỮ LIỆU SQLITE
+-   HỆ QUẢN TRỊ CƠ SỞ DỮ LIỆU MySQL
