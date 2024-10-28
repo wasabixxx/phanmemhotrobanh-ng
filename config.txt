@@ -38,3 +38,11 @@ created_at: Thời điểm giao dịch.
 Users và Roles: Quan hệ 1-n, một người dùng có một vai trò, mỗi vai trò có nhiều người dùng.
 Users và Shifts: Quan hệ 1-n, một người dùng thuộc một ca làm việc, mỗi ca có thể có nhiều người dùng.
 Sales với Products, Users, và Shifts: Quan hệ n-1, mỗi giao dịch bán hàng thuộc một sản phẩm, một nhân viên, và một ca làm việc cụ thể.
+
+
+php artisan db:seed
+php artisan db:seed --class=ShiftsTableSeeder
+php artisan db:seed --class=UsersTableSeeder 
+php artisan db:seed --class=ProductsTableSeeder
+php artisan db:seed --class=SalesTableSeeder 
+php artisan db:seed --class=SalesTableSeeder 
