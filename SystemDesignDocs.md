@@ -41,3 +41,27 @@
    - **Kiểm thử phân quyền và giao diện**: Kiểm tra từng trang xem các nội dung có hiển thị đúng theo vai trò hay không.
    - **Kiểm tra báo cáo doanh thu và lợi nhuận**: Xem dữ liệu có hiển thị đúng theo thời gian và ca làm việc đã chọn không.
    - **Ghi nhận và theo dõi lỗi**: Đảm bảo các tính năng hoạt động ổn định, xử lý các lỗi phát sinh và cập nhật code trên GitHub.
+
+
+   
+<?php
+// Lấy URL từ query string
+$request = $_GET['url'] ?? '';
+
+// Nếu không có yêu cầu, hiển thị trang mặc định
+if ($request === '') {
+    require 'backend/views/default.php'; // Trang mặc định
+} else {
+    // Xử lý routing cho các yêu cầu khác
+    switch ($request) {
+        case 'about':
+            require 'views/about.php';
+            break;
+        case 'contact':
+            require 'views/contact.php';
+            break;
+        default:
+            require 'views/404.php'; // Trang không tìm thấy
+    }
+}
+
