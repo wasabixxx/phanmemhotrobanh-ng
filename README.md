@@ -51,6 +51,6 @@ Page Nhân Viên:
 
 ## Yêu cầu công nghệ
 
--   DÙNG LAVAVEL PHP 
+-   DÙNG PHP 
 -   LƯU TRỮ CODE TRÊN GITHUB (https://github.com/wasabixxx/pmhtBanHang)
 -   HỆ QUẢN TRỊ CƠ SỞ DỮ LIỆU MySQL

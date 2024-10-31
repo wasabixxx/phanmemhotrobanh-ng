@@ -33,7 +33,7 @@
    - **Quản Lý Ca Làm Việc**: Hiển thị báo cáo theo ca đã chọn, ghi nhận tổng tiền bán được và lợi nhuận theo từng ca.
   
 ### 5. **Sử Dụng Công Nghệ**
-   - **Laravel**: Dùng Laravel cho toàn bộ back-end và triển khai routing, controllers, và views.
+   - **PHP**: Dùng PHP cho toàn bộ back-end và boostrap vaf 
    - **MySQL**: Kết nối với cơ sở dữ liệu MySql, lưu trữ file `.sqlite` trong thư mục dự án.
    - **GitHub**: Cập nhật và lưu trữ code trên GitHub để theo dõi và quản lý phiên bản dự án tại [link repo](https://github.com/wasabixxx/pmhtBanHang).
 
