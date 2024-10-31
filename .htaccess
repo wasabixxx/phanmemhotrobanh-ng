@@ -1,12 +1,9 @@
-; RewriteEngine On
-; RewriteBase /
+RewriteEngine On
+RewriteBase /
 
-; # Chuyển hướng tất cả yêu cầu không phải là file hoặc thư mục hiện tại đến index.php
-; RewriteCond %{REQUEST_FILENAME} !-f
-; RewriteCond %{REQUEST_FILENAME} !-d
+# Chuyển hướng tất cả các yêu cầu không phải là file hoặc thư mục đến index.php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
 
-; # Nếu yêu cầu là trang gốc, chuyển hướng đến trang mặc định
-; RewriteRule ^$ index.php [L]
-
-; # Chuyển hướng tất cả các yêu cầu khác đến index.php với tham số url
-; RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
+# Định tuyến yêu cầu đến index.php và truyền tham số `url`
+RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
