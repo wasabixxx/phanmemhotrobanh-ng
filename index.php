@@ -1,17 +1,20 @@
 <?php
 // Lấy slug từ URL
-$slug = isset($_GET['slug']) ? $_GET['slug'] : 'home'; // Mặc định là 'home'
+$slug = isset($_GET['slug']) ? $_GET['slug'] : 'login'; // Mặc định là 'login'
 
 // Xử lý routing dựa trên slug
 switch ($slug) {
-    case 'home':
-        include 'home.php';
+    case 'login':
+        require_once 'backend/views/login.php';
         break;
-    case 'about':
-        include 'about.php';
+    case 'admin':
+        require_once 'backend/views/admin.php';
         break;
-    case 'contact':
-        include 'contact.php';
+    case 'staff':
+        require_once 'backend/views/staff.php';
+        break;
+    case 'logout':
+        require_once 'backend/views/logout.php';
         break;
     default:
         http_response_code(404);

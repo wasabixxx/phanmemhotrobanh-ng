@@ -1,6 +1,6 @@
 <?php
 session_start(); // Khởi động session
-require 'connect_db.php'; // Kết nối cơ sở dữ liệu
+include 'connect_db.php'; // Kết nối cơ sở dữ liệu
 
 // Kiểm tra xem người dùng đã đăng nhập hay chưa
 if (isset($_SESSION['user_id'])) {
@@ -40,11 +40,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             
             // Chuyển hướng đến trang tương ứng
             if ($user['role_id'] == 1) {
-                header("Location: /admin");
+                header("Location: admin");
             } elseif ($user['role_id'] == 2) {
-                header("Location: /admin"); // Hoặc trang dành riêng cho Manager
+                header("Location: admin"); // Hoặc trang dành riêng cho Manager
             } elseif ($user['role_id'] == 3) {
-                header("Location: /staff");
+                header("Location: staff");
             }
             exit();
         } else {
