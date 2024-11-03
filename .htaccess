@@ -1,9 +1,8 @@
 RewriteEngine On
-RewriteBase /
 
-# Chuyển hướng tất cả các yêu cầu không phải là file hoặc thư mục đến index.php
+# Chỉ chuyển hướng nếu không phải là các tệp hoặc thư mục cụ thể
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 
-# Định tuyến yêu cầu đến index.php và truyền tham số `url`
-RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
+# Chuyển hướng các yêu cầu đến index.php với tham số slug
+RewriteRule ^([^/]+)$ index.php?slug=$1 [L,QSA]
