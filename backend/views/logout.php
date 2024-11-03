@@ -11,11 +11,11 @@ if (isset($_SESSION['user_id'])) {
     session_destroy();
 
     // Chuyển hướng đến trang đăng nhập hoặc trang chủ
-    header("Location: ../../");
+    header("Location: login");
     exit; // Dừng thực thi script sau khi chuyển hướng
 } else {
     // Nếu người dùng chưa đăng nhập, chuyển hướng đến trang chủ hoặc đăng nhập
-    header("Location: ../../");
+    header("Location: login");
     exit;
 }
 ?>

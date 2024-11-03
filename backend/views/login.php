@@ -1,6 +1,6 @@
 <?php
 session_start(); // Khởi động session
-include 'connect_db.php'; // Kết nối cơ sở dữ liệu
+require_once 'connect_db.php'; // Kết nối cơ sở dữ liệu
 
 // Kiểm tra xem người dùng đã đăng nhập hay chưa
 if (isset($_SESSION['user_id'])) {
@@ -37,6 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             // Đăng nhập thành công
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['role_id'] = $user['role_id'];
+            $_SESSION['username'] = $user['username']; // Sửa đổi ở đây
             
             // Chuyển hướng đến trang tương ứng
             if ($user['role_id'] == 1) {
@@ -56,26 +57,61 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 }
 ?>
 
+<!doctype html>
+<html lang="vi">
 
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="backend/views/css/login.css" />
-    <title>Neuromorphic Login Page by Rohit Purkait</title>
-  </head>
-  <body>
-    <div class="main-login-form">
-        <div class="login-form-label">
-            <h2>Login</h2>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Đăng nhập hệ thống</title>
+  <link rel="shortcut icon" type="image/png" href="assets/images/logos/seodashlogo.png" />
+  <link rel="stylesheet" href="assets/css/styles.min.css" />
+</head>
+
+<body>
+  <!--  Body Wrapper -->
+  <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
+    data-sidebar-position="fixed" data-header-position="fixed">
+    <div
+      class="position-relative overflow-hidden radial-gradient min-vh-100 d-flex align-items-center justify-content-center">
+      <div class="d-flex align-items-center justify-content-center w-100">
+        <div class="row justify-content-center w-100">
+          <div class="col-md-8 col-lg-6 col-xxl-3">
+            <div class="card mb-0">
+              <div class="card-body">
+                <a href="" class="text-nowrap logo-img text-center d-block py-3 w-100">
+                  <img src="https://icons.veryicon.com/png/System/Small%20%26%20Flat/shop.png" alt="" style="height:50px ; width: auto;">
+                </a>
+                <p class="text-center">Phần mềm hỗ trợ bán hàng</p>
+                <form  action="" method="POST">
+                  <div class="mb-3">
+                    <label for="exampleInputEmail1" class="form-label">Username</label>
+                    <input type="username" name="username" placeholder="Username" class="form-control" required>
+                  </div>
+                  <div class="mb-4">
+                    <label for="exampleInputPassword1" class="form-label">Password</label>
+                    <input type="password" name="password" placeholder="Password" class="form-control" required>
+                  </div>
+                  <div class="d-flex align-items-center justify-content-between mb-4">
+                    <div class="form-check">
+                      <input class="form-check-input primary" type="checkbox" value="" id="flexCheckChecked" checked>
+                      <label class="form-check-label text-dark" for="flexCheckChecked">
+                        Remeber this Device
+                      </label>
+                    </div>
+                  </div>
+                  <button type="submit" class="btn btn-primary w-100 py-8 fs-4 mb-4">ĐĂNG NHẬP</button>
+                </form>
+              </div>
+            </div>
+          </div>
         </div>
-        <form action="" method="POST" class="login-form">
-            <input type="text" name="username" placeholder="Tên người dùng" class="username-input" required>
-            <input type="password" name="password" placeholder="Mật khẩu" class="password-input" required>
-            <button type="submit" class="login-button">Đăng Nhập</button>
-        </form>
+      </div>
     </div>
-  </body>
+  </div>
+  <script src="assets/libs/jquery/dist/jquery.min.js"></script>
+  <script src="assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
+</body>
+
 </html>
