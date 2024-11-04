@@ -284,7 +284,7 @@ $products = $conn->query($sql);
             <input type="file" name="image" accept="image/*" <?php echo $edit_mode ? '' : 'required'; ?>>
             <button type="submit" name="<?php echo $edit_mode ? 'update_product' : 'save_product'; ?>"><?php echo $edit_mode ? 'Cập Nhật' : 'Thêm Sản Phẩm'; ?></button>
             <?php if ($edit_mode): ?>
-                <a href="manage_products.php">Hủy</a>
+                <a href="product">Hủy</a>
             <?php endif; ?>
         </form>
 
