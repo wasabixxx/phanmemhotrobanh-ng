@@ -22,6 +22,9 @@ switch ($slug) {
     case 'product':
         require_once 'backend/views/manage_products.php';
         break;
+    case 'history':
+        require_once 'backend/views/history.php';
+        break;
     default:
         http_response_code(404);
         echo "<h1>404 Not Found</h1>";
