@@ -126,6 +126,7 @@ if (isset($_POST['delete_products'])) {
     }
 }
 
+$role_id = isset($_SESSION['role_id']) ? $_SESSION['role_id'] : null;
 // Lấy danh sách sản phẩm
 $sql = "SELECT * FROM products";
 $products = $conn->query($sql);
@@ -162,8 +163,12 @@ $products = $conn->query($sql);
         <!-- Sidebar navigation-->
         <nav class="sidebar-nav scroll-sidebar" data-simplebar="">
           <ul id="sidebarnav">
+            <li class="nav-small-cap">
+              <i class="ti ti-dots nav-small-cap-icon fs-6"></i>
+              <span class="hide-menu">Chào mừng, <?php echo htmlspecialchars($_SESSION['username']); ?>!</span>
+            </li>
             <li class="sidebar-item">
-              <a class="sidebar-link" href="admin" aria-expanded="false">
+              <a class="sidebar-link " href="admin" aria-expanded="false">
                 <span>
                   <iconify-icon icon="solar:home-smile-bold-duotone" class="fs-6"></iconify-icon>
                 </span>
@@ -175,25 +180,27 @@ $products = $conn->query($sql);
               <span class="hide-menu">QUẢN LÍ ADMIN</span>
             </li>
             <li class="sidebar-item">
-              <a class="sidebar-link" href="product" aria-expanded="false">
+              <a class="sidebar-link active" href="product" aria-expanded="false">
                 <span>
                   <iconify-icon icon="solar:layers-minimalistic-bold-duotone" class="fs-6"></iconify-icon>
                 </span>
                 <span class="hide-menu">Quản lí hàng</span>
               </a>
             </li>
-            <li class="nav-small-cap">
-              <iconify-icon icon="solar:menu-dots-linear" class="nav-small-cap-icon fs-6" class="fs-6"></iconify-icon>
-              <span class="hide-menu">User manager</span>
-            </li>
-            <li class="sidebar-item">
-              <a class="sidebar-link" href="user" aria-expanded="false">
-                <span>
-                  <iconify-icon icon="solar:user-plus-rounded-bold-duotone" class="fs-6"></iconify-icon>
-                </span>
-                <span class="hide-menu">Quản lí tài khoản</span>
-              </a>
-            </li>
+            <?php if ($role_id == 1): ?>
+                <li class="nav-small-cap">
+                    <iconify-icon icon="solar:menu-dots-linear" class="nav-small-cap-icon fs-6" class="fs-6"></iconify-icon>
+                    <span class="hide-menu">User manager</span>
+                </li>
+                <li class="sidebar-item">
+                    <a class="sidebar-link" href="user" aria-expanded="false">
+                        <span>
+                        <iconify-icon icon="solar:user-plus-rounded-bold-duotone" class="fs-6"></iconify-icon>
+                        </span>
+                        <span class="hide-menu">Quản lí tài khoản</span>
+                    </a>
+                </li>
+            <?php endif; ?>
             <li class="nav-small-cap">
               <iconify-icon icon="solar:menu-dots-linear" class="nav-small-cap-icon fs-4" class="fs-6"></iconify-icon>
               <span class="hide-menu">Tài chính</span>
@@ -204,6 +211,14 @@ $products = $conn->query($sql);
                   <iconify-icon icon="solar:sticker-smile-circle-2-bold-duotone" class="fs-6"></iconify-icon>
                 </span>
                 <span class="hide-menu">Check doanh thu</span>
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="staff" aria-expanded="false">
+                <span>
+                  <iconify-icon icon="solar:danger-circle-bold-duotone" class="fs-6"></iconify-icon>
+                </span>
+                <span class="hide-menu">Trang bán hàng</span>
               </a>
             </li>
           </ul>
