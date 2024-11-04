@@ -163,7 +163,7 @@ $products = $conn->query($sql);
         <nav class="sidebar-nav scroll-sidebar" data-simplebar="">
           <ul id="sidebarnav">
             <li class="sidebar-item">
-              <a class="sidebar-link active" href="admin" aria-expanded="false">
+              <a class="sidebar-link" href="admin" aria-expanded="false">
                 <span>
                   <iconify-icon icon="solar:home-smile-bold-duotone" class="fs-6"></iconify-icon>
                 </span>
