@@ -2,52 +2,44 @@
 session_start();
 require_once 'connect_db.php';
 
-// <---in ra thông tin đăng nhập--->
-// echo '<pre>';
-// print_r($_SESSION);
-// echo '</pre>';
-
-// Kiểm tra nếu người dùng chưa đăng nhập hoặc không có role hợp lệ
+// Kiểm tra quyền truy cập
 if (!isset($_SESSION['role_id']) || !in_array($_SESSION['role_id'], [1, 2])) {
-    // Chuyển hướng về trang đăng nhập
     header("Location: login");
-    exit; // Dừng thực thi mã sau khi chuyển hướng
+    exit;
 }
-$role_id = isset($_SESSION['role_id']) ? $_SESSION['role_id'] : null;
+$role_id = $_SESSION['role_id'] ?? null;
 
-// Nếu người dùng có role_id là 1 hoặc 2, cho phép truy cập trang
+// Lựa chọn thời gian
+$time_frame = $_GET['time_frame'] ?? 'day';
 
-// Xử lý yêu cầu chọn thống kê
-$time_frame = isset($_GET['time_frame']) ? $_GET['time_frame'] : 'day';
+// Biến lưu dữ liệu biểu đồ
 $profit_data = [];
+$revenue_data = [];
 $profit_labels = [];
 
-// Lấy dữ liệu lợi nhuận theo thời gian
+// Lấy dữ liệu doanh thu và lợi nhuận theo thời gian
 if ($time_frame == 'week') {
-    $sql_profit = "SELECT DATE(sale_time) AS date, SUM(profit) AS total_profit 
-                   FROM sales 
-                   WHERE sale_time >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
-                   GROUP BY DATE(sale_time)";
+    $sql = "SELECT DATE(sale_time) AS date, SUM(profit) AS total_profit, SUM(total) AS total_revenue
+            FROM sales 
+            WHERE sale_time >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+            GROUP BY DATE(sale_time)";
 } elseif ($time_frame == 'month') {
-    $sql_profit = "SELECT DATE(sale_time) AS date, SUM(profit) AS total_profit 
-                   FROM sales 
-                   WHERE sale_time >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH)
-                   GROUP BY DATE(sale_time)";
+    $sql = "SELECT DATE(sale_time) AS date, SUM(profit) AS total_profit, SUM(total) AS total_revenue
+            FROM sales 
+            WHERE sale_time >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH)
+            GROUP BY DATE(sale_time)";
 } else { // day
-    $sql_profit = "SELECT HOUR(sale_time) AS hour, SUM(profit) AS total_profit 
-                   FROM sales 
-                   WHERE DATE(sale_time) = CURDATE()
-                   GROUP BY HOUR(sale_time)";
+    $sql = "SELECT HOUR(sale_time) AS hour, SUM(profit) AS total_profit, SUM(total) AS total_revenue
+            FROM sales 
+            WHERE DATE(sale_time) = CURDATE()
+            GROUP BY HOUR(sale_time)";
 }
 
-$result_profit = $conn->query($sql_profit);
-while ($row = $result_profit->fetch_assoc()) {
+$result = $conn->query($sql);
+while ($row = $result->fetch_assoc()) {
     $profit_data[] = (float)$row['total_profit'];
-    if ($time_frame == 'day') {
-        $profit_labels[] = $row['hour'] . ':00'; // Định dạng giờ
-    } else {
-        $profit_labels[] = $row['date'];
-    }
+    $revenue_data[] = (float)$row['total_revenue'];
+    $profit_labels[] = ($time_frame == 'day') ? $row['hour'] . ':00' : $row['date'];
 }
 
 // Lấy dữ liệu năng suất nhân viên
@@ -55,9 +47,23 @@ $sql_productivity = "
     SELECT u.username, SUM(s.quantity) AS total_quantity
     FROM users u
     JOIN sales s ON u.id = s.user_id
+    WHERE s.sale_time >= 
+        CASE 
+            WHEN '$time_frame' = 'day' THEN CURDATE()
+            WHEN '$time_frame' = 'week' THEN DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+            WHEN '$time_frame' = 'month' THEN DATE_SUB(CURDATE(), INTERVAL 1 MONTH)
+            ELSE CURDATE()
+        END
     GROUP BY u.id
 ";
+
 $result_productivity = $conn->query($sql_productivity);
+
+// Kiểm tra nếu truy vấn không thành công
+if (!$result_productivity) {
+    die("Lỗi truy vấn năng suất nhân viên: " . $conn->error);
+}
+
 
 $usernames = [];
 $quantities = [];
@@ -66,25 +72,11 @@ while ($row = $result_productivity->fetch_assoc()) {
     $quantities[] = (int)$row['total_quantity'];
 }
 
+$time_frame = in_array($time_frame, ['day', 'week', 'month']) ? $time_frame : 'day';
+
+
 $conn->close();
 ?>
-
-<!doctype html>
-<html lang="en">
-
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ADMIN</title>
-  <link rel="shortcut icon" type="image/png" href="assets/images/logos/seodashlogo.png" />
-  <link rel="stylesheet" href="assets/css/styles.min.css" />
-  <style>
-    .small-select {
-    max-width: 100px; /* Chiều rộng của select */
-    /* Bạn có thể thêm các thuộc tính khác nếu cần */
-    }
-  </style>
-</head>
 
 <body>
   <!--  Body Wrapper -->
@@ -210,7 +202,7 @@ $conn->close();
         <div class="card-body">
           <form method="GET">
             <label class="card-title fw-semibold" for="time_frame">Chọn Thời Gian:</label>
-            <select class="form-select form-select-sm mb-3 mb-md-5 small-select" name="time_frame" id="time_frame" onchange="this.form.submit()">
+            <select class="form-select form-select-sm mb-3 mb-md-5" name="time_frame" id="time_frame" style="max-width: 100px;" onchange="this.form.submit()">
                 <option value="day" <?php echo ($time_frame == 'day') ? 'selected' : ''; ?>>Ngày</option>
                 <option value="week" <?php echo ($time_frame == 'week') ? 'selected' : ''; ?>>Tuần</option>
                 <option value="month" <?php echo ($time_frame == 'month') ? 'selected' : ''; ?>>Tháng</option>
@@ -222,7 +214,7 @@ $conn->close();
               <div class="card">
                 <h2 class="card-title fw-semibold mb-4">Thống Kê Lợi Nhuận</h2>
                 <div class="card-body">
-                  <canvas id="profitChart" width="400" height="200" ></canvas>
+                  <canvas id="profitRevenueChart" width="400" height="200" ></canvas>
                 </div>
               </div>
             </div>
@@ -249,57 +241,109 @@ $conn->close();
   <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-        const ctxProfit = document.getElementById('profitChart').getContext('2d');
-        const profitChart = new Chart(ctxProfit, {
+        // Dữ liệu biểu đồ lợi nhuận và doanh thu
+        const profitLabels = <?php echo json_encode($profit_labels); ?>;
+        const profitData = <?php echo json_encode($profit_data); ?>;
+        const revenueData = <?php echo json_encode($revenue_data); ?>;
+
+        const ctx1 = document.getElementById('profitRevenueChart').getContext('2d');
+        const profitRevenueChart = new Chart(ctx1, {
             type: 'line',
             data: {
-                labels: <?php echo json_encode($profit_labels); ?>,
-                datasets: [{
-                    label: 'Lợi Nhuận',
-                    data: <?php echo json_encode($profit_data); ?>,
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 2,
-                    fill: true
-                }]
+                labels: profitLabels,
+                datasets: [
+                    {
+                        label: 'Doanh Thu',
+                        data: revenueData,
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderWidth: 2,
+                        fill: true,
+                    },
+                    {
+                        label: 'Lợi Nhuận',
+                        data: profitData,
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderWidth: 2,
+                        fill: true,
+                    }
+                ]
             },
             options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Thống Kê Doanh Thu và Lợi Nhuận'
                     },
+                },
+                scales: {
                     x: {
                         title: {
                             display: true,
-                            text: time_frame === 'day' ? 'Giờ trong Ngày' : 'Ngày'
+                            text: 'Thời Gian'
                         }
-                    }
-                }
-            }
-        });
-    </script>
-    <script>
-        const ctxProductivity = document.getElementById('productivityChart').getContext('2d');
-        const productivityChart = new Chart(ctxProductivity, {
-            type: 'bar',
-            data: {
-                labels: <?php echo json_encode($usernames); ?>,
-                datasets: [{
-                    label: 'Số Lượng Bán',
-                    data: <?php echo json_encode($quantities); ?>,
-                    backgroundColor: 'rgba(153, 102, 255, 0.2)',
-                    borderColor: 'rgba(153, 102, 255, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                scales: {
+                    },
                     y: {
+                        title: {
+                            display: true,
+                            text: 'Giá Trị (VND)'
+                        },
                         beginAtZero: true
                     }
                 }
             }
         });
+
+        // Dữ liệu biểu đồ năng suất nhân viên
+        const usernames = <?php echo json_encode($usernames); ?>;
+        const quantities = <?php echo json_encode($quantities); ?>;
+
+        // Tạo màu ngẫu nhiên cho từng cột
+        const colors = usernames.map(() => `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.6)`);
+
+        const ctx2 = document.getElementById('productivityChart').getContext('2d');
+        const productivityChart = new Chart(ctx2, {
+            type: 'bar',
+            data: {
+                labels: usernames,
+                datasets: [
+                    {
+                        label: 'Sản Lượng',
+                        data: quantities,
+                        backgroundColor: colors,
+                        borderColor: colors.map(color => color.replace('0.6', '1')),
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Năng Suất Nhân Viên'
+                    },
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Nhân Viên'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Số Lượng'
+                        },
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
     </script>
 </body>
 

@@ -133,16 +133,6 @@ $products = $conn->query($sql);
 ?>
 
 <!-- HTML phần giao diện -->
-<!doctype html>
-<html lang="en">
-
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ADMIN</title>
-  <link rel="shortcut icon" type="image/png" href="assets/images/logos/seodashlogo.png" />
-  <link rel="stylesheet" href="assets/css/styles.min.css" />
-</head>
 
 <body>
   <!--  Body Wrapper -->

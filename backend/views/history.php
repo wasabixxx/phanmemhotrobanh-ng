@@ -22,6 +22,9 @@ if ($result->num_rows > 0) {
     $username = $user['username'];
 }
 
+date_default_timezone_set('Asia/Bangkok'); // Đặt múi giờ
+// echo date('Y-m-d H:i:s'); // Hiển thị thời gian hiện tại
+
 // Xử lý lọc doanh thu
 $filter = isset($_POST['filter']) ? $_POST['filter'] : 'today';
 $total_revenue = 0;
@@ -70,19 +73,7 @@ if ($role_id == 3) { // Staff
         }
     }
 }
-$role_id = isset($_SESSION['role_id']) ? $_SESSION['role_id'] : null;
 ?>
-
-<!doctype html>
-<html lang="en">
-
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ADMIN</title>
-  <link rel="shortcut icon" type="image/png" href="assets/images/logos/seodashlogo.png" />
-  <link rel="stylesheet" href="assets/css/styles.min.css" />
-</head>
 
 <body>
   <!--  Body Wrapper -->
