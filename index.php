@@ -56,8 +56,7 @@ switch ($slug) {
         break;
     default:
         http_response_code(404);
-        echo "<h1>404 Not Found</h1>";
-        echo "<p>Trang bạn tìm không tồn tại.</p>";
+        require_once 'backend/views/404.php';
         break;
 }
 ?>
