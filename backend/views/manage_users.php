@@ -141,7 +141,7 @@ $users = $conn->query($sql);
                 <span>
                   <iconify-icon icon="solar:home-smile-bold-duotone" class="fs-6"></iconify-icon>
                 </span>
-                <span class="hide-menu">HELLO</span>
+                <span class="hide-menu">Thống kê</span>
               </a>
             </li>
             <li class="nav-small-cap">
@@ -233,88 +233,117 @@ $users = $conn->query($sql);
       </header>
       <!--  Header End -->
     <div class="container-fluid">
-        <h1>Quản Lí Người Dùng</h1>
+      <div class="card">
+          <div class="card-body">
+             <!-- Form thêm và sửa người dùng -->
+            <div class="card">
+              <h2 class="card-title fw-semibold mb-4">Thêm tài khoản</h2>
+              <div class="card-body">
+                  <?php if ($error): ?>
+                      <p style="color: red;"><?= $error ?></p>
+                  <?php endif; ?>
 
-        <?php if ($error): ?>
-            <p style="color: red;"><?= $error ?></p>
-        <?php endif; ?>
+                  <?php if ($success): ?>
+                      <p style="color: green;"><?= $success ?></p>
+                  <?php endif; ?>
 
-        <?php if ($success): ?>
-            <p style="color: green;"><?= $success ?></p>
-        <?php endif; ?>
+                  <form method="POST" action="">
+                    <input class="form-control mb-3" type="hidden" name="user_id" value="<?= $edit_mode ? $edit_user['id'] : '' ?>">
 
-        <!-- Form thêm và sửa người dùng -->
-        <form method="POST" action="">
-            <input type="hidden" name="user_id" value="<?= $edit_mode ? $edit_user['id'] : '' ?>">
-            <label for="username">Tên Đăng Nhập:</label>
-            <input type="text" name="username" id="username" value="<?= $edit_mode ? $edit_user['username'] : '' ?>" required>
+                    <!-- Hàng cho Tên Đăng Nhập, Mật Khẩu, và Xác Nhận Mật Khẩu -->
+                    <div class="row">
+                      <div class="col-md-4">
+                        <label for="username">Tên Đăng Nhập:</label>
+                        <input class="form-control mb-3" type="text" name="username" id="username" value="<?= $edit_mode ? $edit_user['username'] : '' ?>" required>
+                      </div>
 
-            <?php if (!$edit_mode): ?>
-                <label for="password">Mật Khẩu:</label>
-                <input type="password" name="password" id="password" required>
-                <label for="confirm_password">Xác Nhận Mật Khẩu:</label>
-                <input type="password" name="confirm_password" id="confirm_password" required>
-            <?php endif; ?>
+                      <?php if (!$edit_mode): ?>
+                        <div class="col-md-4">
+                          <label for="password">Mật Khẩu:</label>
+                          <input class="form-control mb-3" type="password" name="password" id="password" required>
+                        </div>
+                        <div class="col-md-4">
+                          <label for="confirm_password">Xác Nhận Mật Khẩu:</label>
+                          <input class="form-control mb-3" type="password" name="confirm_password" id="confirm_password" required>
+                        </div>
+                      <?php endif; ?>
+                    </div>
 
-            <label for="role_id">Vai Trò:</label>
-            <select name="role_id" id="role_id" onchange="toggleShiftSelection()" required>
-                <?php foreach ($roles as $id => $role_name): ?>
-                    <option value="<?= $id ?>" <?= $edit_mode && $edit_user['role_id'] == $id ? 'selected' : '' ?>><?= $role_name ?></option>
-                <?php endforeach; ?>
-            </select>
+                    <!-- Hàng cho Vai Trò và Ca Làm Việc -->
+                    <div class="row">
+                      <div class="col-md-6">
+                        <label for="role_id">Vai Trò:</label>
+                        <select class="form-select mb-3" name="role_id" id="role_id" onchange="toggleShiftSelection()" required>
+                          <?php foreach ($roles as $id => $role_name): ?>
+                            <option value="<?= $id ?>" <?= $edit_mode && $edit_user['role_id'] == $id ? 'selected' : '' ?>><?= $role_name ?></option>
+                          <?php endforeach; ?>
+                        </select>
+                      </div>
 
-            <div id="shift_selection" style="display: none;">
-                <label for="shift_id">Ca Làm Việc:</label>
-                <select name="shift_id" id="shift_id">
-                    <?php foreach ($shifts as $id => $shift_name): ?>
-                        <option value="<?= $id ?>" <?= $edit_mode && $edit_user['shift_id'] == $id ? 'selected' : '' ?>><?= $shift_name ?></option>
-                    <?php endforeach; ?>
-                </select>
+                      <div class="col-md-6" id="shift_selection" style="display: none;">
+                        <label for="shift_id">Ca Làm Việc:</label>
+                        <select class="form-select mb-3" name="shift_id" id="shift_id">
+                          <?php foreach ($shifts as $id => $shift_name): ?>
+                            <option value="<?= $id ?>" <?= $edit_mode && $edit_user['shift_id'] == $id ? 'selected' : '' ?>><?= $shift_name ?></option>
+                          <?php endforeach; ?>
+                        </select>
+                      </div>
+                    </div>
+
+                    <!-- Nút Lưu/Thêm -->
+                    <button class="btn btn-success m-1 mb-3" type="submit" name="<?= $edit_mode ? 'update_user' : 'save_user' ?>">
+                      <?= $edit_mode ? 'Lưu' : 'Thêm Người Dùng' ?>
+                    </button>
+                  </form>
+
+                  <?php if ($edit_mode): ?>
+                      <button class="btn btn-danger m-1"><a href="user">Huỷ</a></button> 
+                  <?php endif; ?>
+
+                  <script>
+                      function toggleShiftSelection() {
+                          const roleId = document.getElementById('role_id').value;
+                          document.getElementById('shift_selection').style.display = (roleId == 3) ? 'block' : 'none';
+                      }
+                      toggleShiftSelection(); // Chạy khi trang tải để kiểm tra giá trị đã chọn
+                  </script>
+              </div>
             </div>
-            <button type="submit" name="<?= $edit_mode ? 'update_user' : 'save_user' ?>">
-                <?= $edit_mode ? 'Lưu' : 'Thêm Người Dùng' ?>
-            </button>
-        </form>
-        <?php if ($edit_mode): ?>
-            <button><a href="user">Huỷ</a></button> 
-        <?php endif; ?>
-
-        <script>
-            function toggleShiftSelection() {
-                const roleId = document.getElementById('role_id').value;
-                document.getElementById('shift_selection').style.display = (roleId == 3) ? 'block' : 'none';
-            }
-            toggleShiftSelection(); // Chạy khi trang tải để kiểm tra giá trị đã chọn
-        </script>
-
-        <!-- Bảng danh sách người dùng -->
-        <form method="POST" action="">
-            <table border="1">
-                <thead>
-                    <tr>
-                        <th>Chọn</th>
-                        <th>Tên Đăng Nhập</th>
-                        <th>Vai Trò</th>
-                        <th>Ca Làm Việc</th>
-                        <th>Hành Động</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php while ($user = $users->fetch_assoc()): ?>
-                        <tr>
-                            <td><input type="checkbox" name="user_ids[]" value="<?= $user['id'] ?>"></td>
-                            <td><?= htmlspecialchars($user['username']) ?></td>
-                            <td><?= $roles[$user['role_id']] ?></td>
-                            <td><?= ($user['role_id'] == 3) ? $shifts[$user['shift_id']] : 'Không áp dụng' ?></td>
-                            <td><a href="?edit=<?= $user['id'] ?>">Sửa</a></td>
-                        </tr>
-                    <?php endwhile; ?>
-                </tbody>
-            </table>
-            <?php if (!$edit_mode): ?>
-                <button type="submit" name="delete_users">Xóa Người Dùng Đã Chọn</button>
-            <?php endif; ?>
-        </form>
+                     <!-- Bảng danh sách người dùng -->
+            <div class="card">
+              <h2 class="card-title fw-semibold mb-4">Tài khoản hiện hoạt</h2>
+              <div class="card-body">
+                <form method="POST" action="">
+                    <table class="table text-nowrap align-middle mb-0">
+                        <thead>
+                            <tr class="border-2 border-bottom border-primary border-0">
+                                <th scope="col" class="text-center">Chọn</th>
+                                <th scope="col" class="text-center">Tên Đăng Nhập</th>
+                                <th scope="col" class="text-center">Vai Trò</th>
+                                <th scope="col" class="text-center">Ca Làm Việc</th>
+                                <th scope="col" class="text-center">Hành Động</th>
+                            </tr>
+                        </thead>
+                        <tbody class="table-group-divider">
+                            <?php while ($user = $users->fetch_assoc()): ?>
+                                <tr>
+                                    <td scope="row" class="ps-0 fw-medium"><input type="checkbox" name="user_ids[]" value="<?= $user['id'] ?>"></td>
+                                    <td scope="row" class="text-center fw-medium"><?= htmlspecialchars($user['username']) ?></td>
+                                    <td scope="row" class="text-center fw-medium"><?= $roles[$user['role_id']] ?></td>
+                                    <td scope="row" class="text-center fw-medium"><?= ($user['role_id'] == 3) ? $shifts[$user['shift_id']] : 'Không áp dụng' ?></td>
+                                    <td scope="row" class="text-center fw-medium"><a class="btn btn-primary m-1" href="?edit=<?= $user['id'] ?>">Sửa</a></td>
+                                </tr>
+                            <?php endwhile; ?>
+                        </tbody>
+                    </table>
+                    <?php if (!$edit_mode): ?>
+                        <button class="btn btn-danger m-1" type="submit" name="delete_users">Xóa Người Dùng Đã Chọn</button>
+                    <?php endif; ?>
+                </form>
+              </div>
+            </div>          
+          </div>
+      </div>  
     </div>
   <script src="assets/libs/jquery/dist/jquery.min.js"></script>
   <script src="assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

@@ -113,7 +113,7 @@ $role_id = isset($_SESSION['role_id']) ? $_SESSION['role_id'] : null;
                         <span>
                             <iconify-icon icon="solar:home-smile-bold-duotone" class="fs-6"></iconify-icon>
                         </span>
-                        <span class="hide-menu">HELLO</span>
+                        <span class="hide-menu">Thống kê</span>
                     </a>
                 </li>
                 <li class="nav-small-cap">
@@ -207,126 +207,131 @@ $role_id = isset($_SESSION['role_id']) ? $_SESSION['role_id'] : null;
       <!--  Header End -->
     <div class="container-fluid">
         <h1>Lịch Sử Bán Hàng - <?php echo htmlspecialchars($username); ?></h1>
+      <div class="card">
+        <div class="card-body">
+              <div class="card">
+                <div class="card-body">
+                  <form method="POST">
+                    <label for="filter">Chọn khoảng thời gian:</label>
+                    <div class="row mb-3">
+                      <select class="form-select col" name="filter" id="filter">
+                          <?php if ($role_id == 1): ?>
+                              <option value="today" <?php echo $filter == 'today' ? 'selected' : ''; ?>>Hôm nay</option>
+                              <option value="last_7_days" <?php echo $filter == 'last_7_days' ? 'selected' : ''; ?>>7 ngày qua</option>
+                              <option value="last_month" <?php echo $filter == 'last_month' ? 'selected' : ''; ?>>1 tháng qua</option>
+                          <?php elseif ($role_id == 2): ?>
+                              <option value="today" <?php echo $filter == 'today' ? 'selected' : ''; ?>>Hôm nay</option>
+                              <option value="last_7_days" <?php echo $filter == 'last_7_days' ? 'selected' : ''; ?>>7 ngày qua</option>
+                              <option value="last_month" <?php echo $filter == 'last_month' ? 'selected' : ''; ?>>1 tháng qua</option>
+                          <?php elseif ($role_id == 3): ?>
+                              <option value="today" <?php echo $filter == 'today' ? 'selected' : ''; ?>>Hôm nay</option>
+                          <?php endif; ?>
+                      </select>
+                      <button class="btn btn-primary col" type="submit">Lọc</button>
+                    </div>
+                </form>
+                </div>
+              </div>
+            <div class="card">
+              <h2 class="card-title fw-semibold mb-4">Danh Sách Giao Dịch</h2>
+              <div class="card-body">
+                <div class="table-responsive">
+                  <table class="table text-nowrap align-middle mb-3">
+                      <thead>
+                          <tr class="border-2 border-bottom border-primary border-0">
+                              <th scope="col" class="text-center">Mã sản phẩm</th>
+                              <th scope="col" class="text-center">Tên sản phẩm</th>
+                              <th scope="col" class="text-center">Số lượng</th>
+                              <th scope="col" class="text-center">Tổng tiền</th>
+                              <?php if ($role_id != 3): ?>
+                                  <th>Lợi nhuận</th>
+                              <?php endif; ?>
+                              <th scope="col" class="text-center">Người bán</th>
+                              <th scope="col" class="text-center">Thời gian</th>
+                          </tr>
+                      </thead>
+                      <tbody class="table-group-divider">
+                          <?php
+                          // Lấy danh sách giao dịch từ bảng sales
+                          if ($role_id == 3) {
+                              $sql = "SELECT * FROM sales WHERE user_id = ? AND $shift_condition";
+                              $stmt = $conn->prepare($sql);
+                              $stmt->bind_param("i", $user_id);
+                          } else {
+                              $sql = "SELECT * FROM sales WHERE $shift_condition";
+                              $stmt = $conn->prepare($sql);
+                          }
 
-        <?php if ($role_id == 1): ?>
-            <h2>Doanh thu: <?php echo number_format($total_revenue); ?> ₫</h2>
-            <h2>Lợi nhuận: <?php echo number_format($total_profit); ?> ₫</h2>
-        <?php elseif ($role_id == 2): ?>
-            <h2>Doanh thu: <?php echo number_format($total_revenue); ?> ₫</h2>
-        <?php elseif ($role_id == 3): ?>
-            <h2>Doanh thu hôm nay: <?php echo number_format($total_revenue); ?> ₫</h2>
-        <?php endif; ?>
+                          $stmt->execute();
+                          $result = $stmt->get_result();
+                          if ($result && $result->num_rows > 0) {
+                              while ($row = $result->fetch_assoc()) {
+                                  // Lấy thông tin sản phẩm từ bảng products
+                                  $product_id = isset($row['product_id']) ? $row['product_id'] : null;
+                                  $product_name = '';
+                                  $product_code = '';
+                                  if ($product_id !== null) {
+                                      $product_sql = "SELECT product_name, product_code FROM products WHERE id = ?";
+                                      $product_stmt = $conn->prepare($product_sql);
+                                      $product_stmt->bind_param("i", $product_id);
+                                      $product_stmt->execute();
+                                      $product_result = $product_stmt->get_result();
+                                      if ($product_result->num_rows > 0) {
+                                          $product = $product_result->fetch_assoc();
+                                          $product_name = isset($product['product_name']) ? $product['product_name'] : '';
+                                          $product_code = isset($product['product_code']) ? $product['product_code'] : '';
+                                      }
+                                  }
 
-        <form method="POST">
-            <label for="filter">Chọn khoảng thời gian:</label>
-            <select name="filter" id="filter">
-                <?php if ($role_id == 1): ?>
-                    <option value="today" <?php echo $filter == 'today' ? 'selected' : ''; ?>>Hôm nay</option>
-                    <option value="last_7_days" <?php echo $filter == 'last_7_days' ? 'selected' : ''; ?>>7 ngày qua</option>
-                    <option value="last_month" <?php echo $filter == 'last_month' ? 'selected' : ''; ?>>1 tháng qua</option>
-                <?php elseif ($role_id == 2): ?>
-                    <option value="today" <?php echo $filter == 'today' ? 'selected' : ''; ?>>Hôm nay</option>
-                    <option value="last_7_days" <?php echo $filter == 'last_7_days' ? 'selected' : ''; ?>>7 ngày qua</option>
-                    <option value="last_month" <?php echo $filter == 'last_month' ? 'selected' : ''; ?>>1 tháng qua</option>
-                <?php elseif ($role_id == 3): ?>
-                    <option value="today" <?php echo $filter == 'today' ? 'selected' : ''; ?>>Hôm nay</option>
-                <?php endif; ?>
-            </select>
-            <button type="submit">Lọc</button>
-        </form>
+                                  // Lấy thông tin người bán từ bảng users
+                                  $seller_id = isset($row['user_id']) ? $row['user_id'] : null;
+                                  $seller_name = '';
+                                  if ($seller_id !== null) {
+                                      $seller_sql = "SELECT username FROM users WHERE id = ?";
+                                      $seller_stmt = $conn->prepare($seller_sql);
+                                      $seller_stmt->bind_param("i", $seller_id);
+                                      $seller_stmt->execute();
+                                      $seller_result = $seller_stmt->get_result();
+                                      if ($seller_result->num_rows > 0) {
+                                          $seller = $seller_result->fetch_assoc();
+                                          $seller_name = isset($seller['username']) ? $seller['username'] : '';
+                                      }
+                                  }
 
-        <h2>Danh Sách Giao Dịch</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Mã sản phẩm</th>
-                    <th>Tên sản phẩm</th>
-                    <th>Số lượng</th>
-                    <th>Tổng tiền</th>
-                    <?php if ($role_id != 3): ?>
-                        <th>Lợi nhuận</th>
-                    <?php endif; ?>
-                    <th>Người bán</th>
-                    <th>Thời gian</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php
-                // Lấy danh sách giao dịch từ bảng sales
-                if ($role_id == 3) {
-                    $sql = "SELECT * FROM sales WHERE user_id = ? AND $shift_condition";
-                    $stmt = $conn->prepare($sql);
-                    $stmt->bind_param("i", $user_id);
-                } else {
-                    $sql = "SELECT * FROM sales WHERE $shift_condition";
-                    $stmt = $conn->prepare($sql);
-                }
-
-                $stmt->execute();
-                $result = $stmt->get_result();
-                if ($result && $result->num_rows > 0) {
-                    while ($row = $result->fetch_assoc()) {
-                        // Lấy thông tin sản phẩm từ bảng products
-                        $product_id = isset($row['product_id']) ? $row['product_id'] : null;
-                        $product_name = '';
-                        $product_code = '';
-                        if ($product_id !== null) {
-                            $product_sql = "SELECT product_name, product_code FROM products WHERE id = ?";
-                            $product_stmt = $conn->prepare($product_sql);
-                            $product_stmt->bind_param("i", $product_id);
-                            $product_stmt->execute();
-                            $product_result = $product_stmt->get_result();
-                            if ($product_result->num_rows > 0) {
-                                $product = $product_result->fetch_assoc();
-                                $product_name = isset($product['product_name']) ? $product['product_name'] : '';
-                                $product_code = isset($product['product_code']) ? $product['product_code'] : '';
-                            }
-                        }
-
-                        // Lấy thông tin người bán từ bảng users
-                        $seller_id = isset($row['user_id']) ? $row['user_id'] : null;
-                        $seller_name = '';
-                        if ($seller_id !== null) {
-                            $seller_sql = "SELECT username FROM users WHERE id = ?";
-                            $seller_stmt = $conn->prepare($seller_sql);
-                            $seller_stmt->bind_param("i", $seller_id);
-                            $seller_stmt->execute();
-                            $seller_result = $seller_stmt->get_result();
-                            if ($seller_result->num_rows > 0) {
-                                $seller = $seller_result->fetch_assoc();
-                                $seller_name = isset($seller['username']) ? $seller['username'] : '';
-                            }
-                        }
-
-                        // Hiển thị thông tin giao dịch
-                        echo '<tr>
-                                <td>' . htmlspecialchars($product_code) . '</td>
-                                <td>' . htmlspecialchars($product_name) . '</td>
-                                <td>' . (isset($row['quantity']) ? htmlspecialchars($row['quantity']) : 'N/A') . '</td>
-                                <td>' . (isset($row['total']) ? number_format($row['total']) . ' ₫' : 'N/A') . '</td>';
-                        if ($role_id != 3) {
-                            echo '<td>' . (isset($row['profit']) ? number_format($row['profit']) . ' ₫' : 'N/A') . '</td>';
-                        }
-                        echo '<td>' . htmlspecialchars($seller_name) . '</td>
-                                <td>' . (isset($row['sale_time']) ? date('d-m-Y H:i:s', strtotime($row['sale_time'])) : 'N/A') . '</td>
-                            </tr>';
-                    }
-                } else {
-                    echo '<tr><td colspan="7">Chưa có giao dịch nào.</td></tr>';
-                }
-                ?>
-            </tbody>
-            <tfoot>
-                <tr class="total-row">
-                    <td colspan="3">Tổng cộng:</td>
-                    <td><?php echo number_format($total_revenue); ?> ₫</td>
-                    <?php if ($role_id != 3): ?>
-                        <td><?php echo number_format($total_profit); ?> ₫</td>
-                    <?php endif; ?>
-                    <td colspan="2"></td>
-                </tr>
-            </tfoot>
-        </table>
+                                  // Hiển thị thông tin giao dịch
+                                  echo '<tr>
+                                          <td scope="row" class="text-center fw-medium">' . htmlspecialchars($product_code) . '</td>
+                                          <td scope="row" class="text-center fw-medium">' . htmlspecialchars($product_name) . '</td>
+                                          <td scope="row" class="text-center fw-medium">' . (isset($row['quantity']) ? htmlspecialchars($row['quantity']) : 'N/A') . '</td>
+                                          <td scope="row" class="text-center fw-medium">' . (isset($row['total']) ? number_format($row['total']) . ' ₫' : 'N/A') . '</td>';
+                                  if ($role_id != 3) {
+                                      echo '<td>' . (isset($row['profit']) ? number_format($row['profit']) . ' ₫' : 'N/A') . '</td>';
+                                  }
+                                  echo '<td scope="row" class="text-center fw-medium">' . htmlspecialchars($seller_name) . '</td>
+                                          <td scope="row" class="text-center fw-medium">' . (isset($row['sale_time']) ? date('d-m-Y H:i:s', strtotime($row['sale_time'])) : 'N/A') . '</td>
+                                      </tr>';
+                              }
+                          } else {
+                              echo '<tr><td colspan="7">Chưa có giao dịch nào.</td></tr>';
+                          }
+                          ?>
+                      </tbody>
+                      <tfoot>
+                          <tr class="total-row">
+                              <td colspan="3">Tổng cộng:</td>
+                              <td><?php echo number_format($total_revenue); ?> ₫</td>
+                              <?php if ($role_id != 3): ?>
+                                  <td><?php echo number_format($total_profit); ?> ₫</td>
+                              <?php endif; ?>
+                              <td colspan="2"></td>
+                          </tr>
+                      </tfoot>
+                  </table>
+                </div>
+              </div>
+            </div>
+        </div>
+      </div>  
     </div>
   <script src="assets/libs/jquery/dist/jquery.min.js"></script>
   <script src="assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

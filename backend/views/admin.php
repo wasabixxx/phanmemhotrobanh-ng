@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once 'connect_db.php';
 
 // <---in ra thông tin đăng nhập--->
 // echo '<pre>';
@@ -15,7 +16,59 @@ if (!isset($_SESSION['role_id']) || !in_array($_SESSION['role_id'], [1, 2])) {
 $role_id = isset($_SESSION['role_id']) ? $_SESSION['role_id'] : null;
 
 // Nếu người dùng có role_id là 1 hoặc 2, cho phép truy cập trang
+
+// Xử lý yêu cầu chọn thống kê
+$time_frame = isset($_GET['time_frame']) ? $_GET['time_frame'] : 'day';
+$profit_data = [];
+$profit_labels = [];
+
+// Lấy dữ liệu lợi nhuận theo thời gian
+if ($time_frame == 'week') {
+    $sql_profit = "SELECT DATE(sale_time) AS date, SUM(profit) AS total_profit 
+                   FROM sales 
+                   WHERE sale_time >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+                   GROUP BY DATE(sale_time)";
+} elseif ($time_frame == 'month') {
+    $sql_profit = "SELECT DATE(sale_time) AS date, SUM(profit) AS total_profit 
+                   FROM sales 
+                   WHERE sale_time >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH)
+                   GROUP BY DATE(sale_time)";
+} else { // day
+    $sql_profit = "SELECT HOUR(sale_time) AS hour, SUM(profit) AS total_profit 
+                   FROM sales 
+                   WHERE DATE(sale_time) = CURDATE()
+                   GROUP BY HOUR(sale_time)";
+}
+
+$result_profit = $conn->query($sql_profit);
+while ($row = $result_profit->fetch_assoc()) {
+    $profit_data[] = (float)$row['total_profit'];
+    if ($time_frame == 'day') {
+        $profit_labels[] = $row['hour'] . ':00'; // Định dạng giờ
+    } else {
+        $profit_labels[] = $row['date'];
+    }
+}
+
+// Lấy dữ liệu năng suất nhân viên
+$sql_productivity = "
+    SELECT u.username, SUM(s.quantity) AS total_quantity
+    FROM users u
+    JOIN sales s ON u.id = s.user_id
+    GROUP BY u.id
+";
+$result_productivity = $conn->query($sql_productivity);
+
+$usernames = [];
+$quantities = [];
+while ($row = $result_productivity->fetch_assoc()) {
+    $usernames[] = $row['username'];
+    $quantities[] = (int)$row['total_quantity'];
+}
+
+$conn->close();
 ?>
+
 <!doctype html>
 <html lang="en">
 
@@ -25,6 +78,12 @@ $role_id = isset($_SESSION['role_id']) ? $_SESSION['role_id'] : null;
   <title>ADMIN</title>
   <link rel="shortcut icon" type="image/png" href="assets/images/logos/seodashlogo.png" />
   <link rel="stylesheet" href="assets/css/styles.min.css" />
+  <style>
+    .small-select {
+    max-width: 100px; /* Chiều rộng của select */
+    /* Bạn có thể thêm các thuộc tính khác nếu cần */
+    }
+  </style>
 </head>
 
 <body>
@@ -55,7 +114,7 @@ $role_id = isset($_SESSION['role_id']) ? $_SESSION['role_id'] : null;
                 <span>
                   <iconify-icon icon="solar:home-smile-bold-duotone" class="fs-6"></iconify-icon>
                 </span>
-                <span class="hide-menu">HELLO</span>
+                <span class="hide-menu">Thống kê</span>
               </a>
             </li>
             <li class="nav-small-cap">
@@ -147,31 +206,39 @@ $role_id = isset($_SESSION['role_id']) ? $_SESSION['role_id'] : null;
       </header>
       <!--  Header End -->
     <div class="container-fluid">
-        <h1>Chào mừng, <?php echo htmlspecialchars($_SESSION['username']); ?>!</h1> <!-- Hiển thị tên người dùng -->
-    
-        <?php if ($_SESSION['role_id'] == 1): ?>
-            <h2>Chào mừng Admin!</h2>
-            <!-- Nội dung dành cho Admin -->
-            <ul>
-                <li><a href="user">Quản lí tài khoản nhân viên</a></li>
-                <li><a href="product">Quản lí thêm đồ vào kho</a></li>
-                <li>Check doanh thu</li>
-                <li>Check lợi nhuận</li>
-                <li>Check hàng tồn kho</li>
-                <li><a href='logout'>Đăng xuất</a></li>
-            </ul>
-        <?php elseif ($_SESSION['role_id'] == 2): ?>
-            <h2>Chào mừng Manager!</h2>
-            <!-- Nội dung dành cho Manager -->
-            <ul>
-                <li>Quản lí thêm đồ vào kho</li>
-                <li>Check doanh thu</li>
-                <li>Check hàng tồn kho</li>
-                <li><a href='logout'>Đăng xuất</a></li>
-            </ul>
-        <?php endif; ?>
+      <div class="card">
+        <div class="card-body">
+          <form method="GET">
+            <label class="card-title fw-semibold" for="time_frame">Chọn Thời Gian:</label>
+            <select class="form-select form-select-sm mb-3 mb-md-5 small-select" name="time_frame" id="time_frame" onchange="this.form.submit()">
+                <option value="day" <?php echo ($time_frame == 'day') ? 'selected' : ''; ?>>Ngày</option>
+                <option value="week" <?php echo ($time_frame == 'week') ? 'selected' : ''; ?>>Tuần</option>
+                <option value="month" <?php echo ($time_frame == 'month') ? 'selected' : ''; ?>>Tháng</option>
+            </select>
+          </form>
+          <div class="row">
+            <div class="col-lg-5">
+              <!-- card1 -->
+              <div class="card">
+                <h2 class="card-title fw-semibold mb-4">Thống Kê Lợi Nhuận</h2>
+                <div class="card-body">
+                  <canvas id="profitChart" width="400" height="200" ></canvas>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-5">
+              <!-- card2  -->
+              <div class="card">
+                <h2 class="card-title fw-semibold mb-4">Biểu Đồ Năng Suất Nhân Viên</h2>
+                <div class="card-body">
+                  <canvas id="productivityChart" width="400" height="200"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+    </div>
   <script src="assets/libs/jquery/dist/jquery.min.js"></script>
   <script src="assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
   <script src="assets/libs/apexcharts/dist/apexcharts.min.js"></script>
@@ -180,6 +247,60 @@ $role_id = isset($_SESSION['role_id']) ? $_SESSION['role_id'] : null;
   <script src="assets/js/app.min.js"></script>
   <script src="assets/js/dashboard.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+        const ctxProfit = document.getElementById('profitChart').getContext('2d');
+        const profitChart = new Chart(ctxProfit, {
+            type: 'line',
+            data: {
+                labels: <?php echo json_encode($profit_labels); ?>,
+                datasets: [{
+                    label: 'Lợi Nhuận',
+                    data: <?php echo json_encode($profit_data); ?>,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 2,
+                    fill: true
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: time_frame === 'day' ? 'Giờ trong Ngày' : 'Ngày'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+    <script>
+        const ctxProductivity = document.getElementById('productivityChart').getContext('2d');
+        const productivityChart = new Chart(ctxProductivity, {
+            type: 'bar',
+            data: {
+                labels: <?php echo json_encode($usernames); ?>,
+                datasets: [{
+                    label: 'Số Lượng Bán',
+                    data: <?php echo json_encode($quantities); ?>,
+                    backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                    borderColor: 'rgba(153, 102, 255, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
 </body>
 
 </html>

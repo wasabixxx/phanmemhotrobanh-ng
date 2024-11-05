@@ -172,7 +172,7 @@ $products = $conn->query($sql);
                 <span>
                   <iconify-icon icon="solar:home-smile-bold-duotone" class="fs-6"></iconify-icon>
                 </span>
-                <span class="hide-menu">HELLO</span>
+                <span class="hide-menu">Thống kê</span>
               </a>
             </li>
             <li class="nav-small-cap">
@@ -263,74 +263,123 @@ $products = $conn->query($sql);
         </nav>
       </header>
       <!--  Header End -->
-    <div class="container-fluid">
-        <h1>Quản Lý Sản Phẩm</h1>
+      <div class="container-fluid">
+        <div class="card">
+          <div class="card-body">
+                <!-- card 1 -->
+                <div class="card">
+                  <h2 class="card-title fw-semibold mb-4">Thêm Sản Phẩm</h2>
+                  <div class="card-body">
+                    <?php if ($error): ?>
+                        <p style="color: red;"><?php echo $error; ?></p>
+                    <?php endif; ?>
+                    <?php if ($success): ?>
+                        <p style="color: green;"><?php echo $success; ?></p>
+                    <?php endif; ?>
 
-        <?php if ($error): ?>
-            <p style="color: red;"><?php echo $error; ?></p>
-        <?php endif; ?>
+                    <form action="" method="POST" enctype="multipart/form-data">
+                        <input class="mb-3 form-control" type="hidden" name="product_id" value="<?php echo $edit_mode ? $edit_product['id'] : ''; ?>">
+                        
+                        <!-- Dòng đầu tiên có 2 input -->
+                        <div class="row mb-3">
+                          <div class="col">
+                            <input class="form-control" type="text" name="product_code" placeholder="Mã sản phẩm" required value="<?php echo isset($edit_product) ? $edit_product['product_code'] : ''; ?>">
+                          </div>
+                          <div class="col">
+                            <input class="form-control" type="text" name="product_name" placeholder="Tên sản phẩm" required value="<?php echo $edit_mode ? $edit_product['product_name'] : ''; ?>">
+                          </div>
+                        </div>
 
-        <?php if ($success): ?>
-            <p style="color: green;"><?php echo $success; ?></p>
-        <?php endif; ?>
+                        <!-- Dòng thứ hai có 2 input -->
+                        <div class="row mb-3">
+                          <div class="col">
+                            <input class="form-control" type="number" name="quantity" placeholder="Số lượng" required value="<?php echo $edit_mode ? $edit_product['quantity'] : ''; ?>">
+                          </div>
+                          <div class="col">
+                            <input class="form-control" type="number" step="0.01" name="price_buy" placeholder="Giá nhập" required value="<?php echo $edit_mode ? $edit_product['price_buy'] : ''; ?>">
+                          </div>
+                        </div>
 
-        <form action="" method="POST" enctype="multipart/form-data">
-            <input type="hidden" name="product_id" value="<?php echo $edit_mode ? $edit_product['id'] : ''; ?>">
-            <input type="text" name="product_code" placeholder="Mã sản phẩm" required value="<?php echo isset($edit_product) ? $edit_product['product_code'] : ''; ?>">
-            <input type="text" name="product_name" placeholder="Tên sản phẩm" required value="<?php echo $edit_mode ? $edit_product['product_name'] : ''; ?>">
-            <input type="number" name="quantity" placeholder="Số lượng" required value="<?php echo $edit_mode ? $edit_product['quantity'] : ''; ?>">
-            <input type="number" step="0.01" name="price_buy" placeholder="Giá nhập" required value="<?php echo $edit_mode ? $edit_product['price_buy'] : ''; ?>">
-            <input type="number" step="0.01" name="price_sell" placeholder="Giá bán" required value="<?php echo $edit_mode ? $edit_product['price_sell'] : ''; ?>">
-            <input type="file" name="image" accept="image/*" <?php echo $edit_mode ? '' : 'required'; ?>>
-            <button type="submit" name="<?php echo $edit_mode ? 'update_product' : 'save_product'; ?>"><?php echo $edit_mode ? 'Cập Nhật' : 'Thêm Sản Phẩm'; ?></button>
-            <?php if ($edit_mode): ?>
-                <a href="product">Hủy</a>
-            <?php endif; ?>
-        </form>
+                        <!-- Dòng thứ ba có 2 input -->
+                        <div class="row mb-3">
+                          <div class="col">
+                            <input class="form-control" type="number" step="0.01" name="price_sell" placeholder="Giá bán" required value="<?php echo $edit_mode ? $edit_product['price_sell'] : ''; ?>">
+                          </div>
+                          <div class="col">
+                            <input class="form-control" type="file" name="image" accept="image/*" <?php echo $edit_mode ? '' : 'required'; ?>>
+                          </div>
+                        </div>
 
-        <h2>Danh Sách Sản Phẩm</h2>
-        <form action="" method="POST">
-        <table>
-            <thead>
-                <tr>
-                    <th><input type="checkbox" id="select-all"></th>
-                    <th>Mã sản phẩm</th>
-                    <th>Tên sản phẩm</th>
-                    <th>Số lượng</th>
-                    <th>Giá mua</th>
-                    <th>Giá bán</th>
-                    <th>Hình ảnh</th>
-                    <th>Hành động</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php while ($product = $products->fetch_assoc()): ?>
-                <tr>
-                    <td><input type="checkbox" name="product_ids[]" value="<?php echo $product['id']; ?>"></td>
-                    <td><?php echo $product['product_code']; ?></td>
-                    <td><?php echo $product['product_name']; ?></td>
-                    <td><?php echo $product['quantity']; ?></td>
-                    <td><?php echo number_format($product['price_buy']); ?> ₫</td>
-                    <td><?php echo number_format($product['price_sell']); ?> ₫</td>
-                    <td><img src="<?php echo $product['image']; ?>" alt="<?php echo $product['product_name']; ?>" style="width: 100px; height: auto;"></td>
-                    <td>
-                        <a href="?edit=<?php echo $product['id']; ?>">Sửa</a>
-                        <form action="" method="POST" style="display:inline;">
-                            <input type="hidden" name="product_id" value="<?php echo $product['id']; ?>">
-                            <input type="number" name="quantity" placeholder="Nhập số lượng">
-                            <button type="submit" name="add_stock">Nhập hàng</button>
-                            <button type="submit" name="remove_stock">Hủy hàng</button>
-                        </form>
-                    </td>
-                </tr>
-                <?php endwhile; ?>
-            </tbody>
-        </table>
+                        <button class="btn btn-success m-1 mb-3" type="submit" name="<?php echo $edit_mode ? 'update_product' : 'save_product'; ?>"><?php echo $edit_mode ? 'Cập Nhật' : 'Thêm Sản Phẩm'; ?></button>
+                        <?php if ($edit_mode): ?>
+                            <a href="product">Hủy</a>
+                        <?php endif; ?>
+                    </form>
+                  </div>
+                </div>
 
-        <button type="submit" name="delete_products">Xóa sản phẩm đã chọn</button>
-        </form>
-    </div>
-  </div>
+                <!-- card 2 -->
+                <div class="card">
+                  <h2 class="card-title fw-semibold mb-4">Danh Sách Sản Phẩm</h2>
+                  <div class="card-body">
+                    <form action="" method="POST">
+                      <div class="table-responsive">
+                        <table class="table text-nowrap align-middle mb-3">
+                          <thead>
+                            <tr class="border-2 border-bottom border-primary border-0">
+                              <th scope="col"><input type="checkbox" id="select-all"></th>
+                              <th scope="col" class="text-center">Mã sản phẩm</th>
+                              <th scope="col" class="text-center">Tên sản phẩm</th>
+                              <th scope="col" class="text-center">Tồn kho</th>
+                              <th scope="col" class="text-center">Giá mua</th>
+                              <th scope="col" class="text-center">Giá bán</th>
+                              <th scope="col" class="text-center">Hình ảnh</th>
+                              <th scope="col" class="text-center">Hành động</th>
+                            </tr>
+                          </thead>
+                          <tbody class="table-group-divider">
+                            <?php while ($product = $products->fetch_assoc()): ?>
+                            <tr>
+                              <td scope="row" class="ps-0 fw-medium"><input type="checkbox" name="product_ids[]" value="<?php echo $product['id']; ?>"></td>
+                              <td scope="row" class="text-center fw-medium"><?php echo $product['product_code']; ?></td>
+                              <td scope="row" class="text-center fw-medium"><?php echo $product['product_name']; ?></td>
+                              <td scope="row" class="text-center fw-medium"><?php echo $product['quantity']; ?></td>
+                              <td scope="row" class="text-center fw-medium"><?php echo number_format($product['price_buy']); ?> ₫</td>
+                              <td scope="row" class="text-center fw-medium"><?php echo number_format($product['price_sell']); ?> ₫</td>
+                              <td scope="row" class="text-center fw-medium">
+                                <img src="<?php echo $product['image']; ?>" alt="<?php echo $product['product_name']; ?>" style="width: 100px; height: auto;">
+                              </td>
+                              <td scope="row" class="text-center fw-medium">
+                                <!-- Nhóm Sửa và Ô Nhập -->
+                                <div class="d-flex align-items-center mb-2">
+                                  <a class="btn btn-secondary btn-sm me-2" href="?edit=<?php echo $product['id']; ?>">Sửa</a>
+                                  <input class="form-control form-control-sm" style="width: 80px;" type="number" name="quantity" placeholder="Số lượng">
+                                </div>
+
+                                <!-- Nhóm Nhập hàng và Hủy hàng -->
+                                <div class="d-flex">
+                                  <form action="" method="POST" style="display:inline-flex;">
+                                    <input type="hidden" name="product_id" value="<?php echo $product['id']; ?>">
+                                    <button class="btn btn-danger btn-sm me-1" type="submit" name="add_stock">Nhập hàng</button>
+                                    <button class="btn btn-danger btn-sm" type="submit" name="remove_stock">Hủy hàng</button>
+                                  </form>
+                                </div>
+                              </td>
+                            </tr>
+                            <?php endwhile; ?>
+                          </tbody>
+                        </table>
+                      </div>
+
+                      <button class="btn btn-danger m-1" type="submit" name="delete_products">Xóa sản phẩm đã chọn</button>
+                    </form>
+                  </div>
+                </div>
+   
+            </div>
+          </div>
+        </div>
+      </div>
   <script src="assets/libs/jquery/dist/jquery.min.js"></script>
   <script src="assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
   <script src="assets/libs/apexcharts/dist/apexcharts.min.js"></script>

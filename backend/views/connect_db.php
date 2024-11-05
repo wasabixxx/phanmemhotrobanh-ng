@@ -1,6 +1,6 @@
 <?php
 // Kết nối đến MySQL bằng MySQLi
-$host = 'localhost';
+$host = 'localhost:3307';
 $dbname = 'pmhtbanhang';
 $username = 'root';
 $password = '';
