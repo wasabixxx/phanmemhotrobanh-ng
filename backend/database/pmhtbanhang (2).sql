@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: localhost:3307
--- Thời gian đã tạo: Th10 04, 2024 lúc 12:41 PM
+-- Thời gian đã tạo: Th10 06, 2024 lúc 06:09 PM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.2.12
 
@@ -42,9 +42,27 @@ CREATE TABLE `products` (
 --
 
 INSERT INTO `products` (`id`, `product_name`, `quantity`, `price_buy`, `price_sell`, `image`, `product_code`) VALUES
-(8, 'cứt chó ', 4970, 10.00, 20.00, 'images/abu7.png', 'CUT'),
-(10, 'siêu cứt', 530, 20000.00, 50000.00, 'images/1 (4).jpg', 'NGu'),
-(11, 'cứt ngu', 10000, 20000.00, 500000.00, 'images/draw2.svg', 'CUTNGU');
+(15, 'Bánh ngọt', 990, 5000.00, 10000.00, 'images/nhung-loai-banh-ngot-noi-tieng-tren-the-gioi-1591093362.jpg', 'Banh1');
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `roles`
+--
+
+CREATE TABLE `roles` (
+  `id` int(11) NOT NULL,
+  `role_name` varchar(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `roles`
+--
+
+INSERT INTO `roles` (`id`, `role_name`) VALUES
+(1, 'Admin'),
+(2, 'Manager'),
+(3, 'Staff');
 
 -- --------------------------------------------------------
 
@@ -68,15 +86,27 @@ CREATE TABLE `sales` (
 --
 
 INSERT INTO `sales` (`id`, `product_code`, `user_id`, `product_id`, `quantity`, `total`, `profit`, `sale_time`) VALUES
-(4, 'CUT', 8, 8, 10, 200.00, 200.00, '2024-11-04 14:36:54'),
-(5, 'NGu', 8, 10, 10, 500000.00, 0.00, '2024-11-04 15:04:09'),
-(6, 'NGu', 8, 10, 10, 500000.00, 300000.00, '2024-11-04 15:07:22'),
-(7, 'CUT', 8, 8, 10, 200.00, 100.00, '2024-11-04 15:08:44'),
-(8, 'NGu', 8, 10, 10, 500000.00, 300000.00, '2024-11-04 15:08:44'),
-(9, 'NGu', 4, 10, 10, 500000.00, 300000.00, '2024-11-04 15:39:38'),
-(10, 'CUT', 8, 8, 10, 200.00, 100.00, '2024-11-04 15:59:08'),
-(11, 'NGu', 8, 10, 10, 500000.00, 300000.00, '2024-11-04 15:59:08'),
-(12, 'CUT', 4, 8, 10, 200.00, 100.00, '2024-11-04 18:41:22');
+(136, 'Banh1', 4, 15, 10, 100000.00, 50000.00, '2024-11-06 23:55:19');
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `shifts`
+--
+
+CREATE TABLE `shifts` (
+  `id` int(11) NOT NULL,
+  `shift_name` varchar(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `shifts`
+--
+
+INSERT INTO `shifts` (`id`, `shift_name`) VALUES
+(1, 'Ca Sáng'),
+(2, 'Ca Chiều'),
+(3, 'Ca Tối');
 
 -- --------------------------------------------------------
 
@@ -97,11 +127,12 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `username`, `password`, `role_id`, `shift_id`) VALUES
-(2, 'manager', '$2y$10$e0xFZszE7gUO2y7A3m7FFe.CUtZ0.BPhQj2mk9XU8zy66/37PeGdG', 2, NULL),
-(3, 'staff1', '$2y$10$e0xFZszE7gUO2y7A3m7FFe.CUtZ0.BPhQj2mk9XU8zy66/37PeGdG', 3, 2),
 (4, 'khanh', '$2y$10$WJi6ooG/BHCEc9sEtzgXHe3LpRRkYQNd4TE7KVQ5MVnVyspGmA/ua', 1, NULL),
-(6, 'quanli', '$2y$10$2Dx3wcDPobihIuWlW625ZOjLqS1zdjXs9nzznG.cWrbml2eYOHE.G', 2, NULL),
-(8, 'staff', '$2y$10$l7nLXN0B6/wBuxOEE3qA9OJVITsM97huwDpraki18Voxb31/vurA6', 3, 1);
+(8, 'nvcatoi', '$2y$10$l7nLXN0B6/wBuxOEE3qA9OJVITsM97huwDpraki18Voxb31/vurA6', 3, 3),
+(15, 'nvcasang', '$2y$10$N.OmeF2Jkf6MAt.vHofpp.W8T7Ta07rwq.99ISV9cOaPqLetkyLta', 3, 1),
+(16, 'nvcachieu', '$2y$10$P2LbTlDjdyW./mQQv3yyLONxQA6IvOqbLu0C5cNhXXssXgVNRo9/m', 3, 2),
+(17, 'toanquanli', '$2y$10$k6KYVAW/A6NCvmEJefSNs.6GfoFnfI7bQ26.4xsJb467n4iPsGwJS', 2, NULL),
+(18, 'admin', '$2y$10$l9EyxAbqTcHGEBz8RxTmaeWwemP.vNDPN1g7sBBc3m73VyB55DSGO', 1, NULL);
 
 --
 -- Chỉ mục cho các bảng đã đổ
@@ -114,12 +145,24 @@ ALTER TABLE `products`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Chỉ mục cho bảng `roles`
+--
+ALTER TABLE `roles`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Chỉ mục cho bảng `sales`
 --
 ALTER TABLE `sales`
   ADD PRIMARY KEY (`id`),
   ADD KEY `user_id` (`user_id`),
   ADD KEY `product_id` (`product_id`);
+
+--
+-- Chỉ mục cho bảng `shifts`
+--
+ALTER TABLE `shifts`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Chỉ mục cho bảng `users`
@@ -138,19 +181,31 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT cho bảng `products`
 --
 ALTER TABLE `products`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+
+--
+-- AUTO_INCREMENT cho bảng `roles`
+--
+ALTER TABLE `roles`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT cho bảng `sales`
 --
 ALTER TABLE `sales`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=137;
+
+--
+-- AUTO_INCREMENT cho bảng `shifts`
+--
+ALTER TABLE `shifts`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT cho bảng `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- Các ràng buộc cho các bảng đã đổ
