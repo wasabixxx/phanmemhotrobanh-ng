@@ -97,33 +97,48 @@ if (isset($_GET['edit'])) {
 
 // Xử lý xóa sản phẩm
 if (isset($_POST['delete_products'])) {
-    if (!empty($_POST['product_ids'])) {
-        $product_ids = $_POST['product_ids'];
-        
-        // Bắt đầu transaction
-        $conn->begin_transaction();
-        
-        try {
-            // Xóa các bản ghi liên quan trong bảng sales
-            $ids = implode(',', $product_ids);
-            $sql_sales_delete = "DELETE FROM sales WHERE product_id IN ($ids)";
-            $conn->query($sql_sales_delete);
-            
-            // Sau đó xóa sản phẩm
-            $sql_products_delete = "DELETE FROM products WHERE id IN ($ids)";
-            $conn->query($sql_products_delete);
-            
-            // Commit transaction
-            $conn->commit();
-            $success = 'Sản phẩm đã được xóa thành công!';
-        } catch (Exception $e) {
-            // Rollback nếu có lỗi
-            $conn->rollback();
-            $error = 'Lỗi khi xóa sản phẩm: ' . $e->getMessage();
-        }
-    } else {
-        $error = 'Chưa chọn sản phẩm nào để xóa!';
-    }
+  if (!empty($_POST['product_ids'])) {
+      $product_ids = $_POST['product_ids'];
+      
+      // Bắt đầu transaction
+      $conn->begin_transaction();
+      
+      try {
+          // Chuyển mảng các ID thành chuỗi các ID cách nhau bởi dấu phẩy
+          $ids = implode(',', $product_ids);
+          
+          // Lấy đường dẫn ảnh của các sản phẩm để xóa
+          $sql_select_images = "SELECT image FROM products WHERE id IN ($ids)";
+          $result = $conn->query($sql_select_images);
+          
+          // Xóa file ảnh khỏi server nếu có
+          while ($row = $result->fetch_assoc()) {
+              $image_path = $row['image'];
+              if (file_exists($image_path)) {
+                  unlink($image_path); // Xóa file ảnh
+              }
+          }
+          
+          // Xóa các bản ghi liên quan trong bảng sales
+          $sql_sales_delete = "DELETE FROM sales WHERE product_id IN ($ids)";
+          $conn->query($sql_sales_delete);
+          
+          // Sau đó xóa sản phẩm trong bảng products
+          $sql_products_delete = "DELETE FROM products WHERE id IN ($ids)";
+          $conn->query($sql_products_delete);
+          
+          // Commit transaction
+          $conn->commit();
+          $success = 'Sản phẩm và ảnh đã được xóa thành công!';
+          
+      } catch (Exception $e) {
+          // Rollback nếu có lỗi
+          $conn->rollback();
+          $error = 'Lỗi khi xóa sản phẩm: ' . $e->getMessage();
+      }
+  } else {
+      $error = 'Chưa chọn sản phẩm nào để xóa!';
+  }
 }
 
 $role_id = isset($_SESSION['role_id']) ? $_SESSION['role_id'] : null;

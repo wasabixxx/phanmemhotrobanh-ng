@@ -23,7 +23,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title> PMHT BÁN HÀNG </title>
-  <link rel="shortcut icon" type="image/png" href="assets/images/logos/seodashlogo.png" />
+  <link rel="shortcut icon" type="image/png" href="https://icons.veryicon.com/png/System/Small%20%26%20Flat/shop.png" />
   <link rel="stylesheet" href="assets/css/styles.min.css" />
 </head>
 

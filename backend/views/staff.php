@@ -98,7 +98,7 @@ if (isset($_POST['search_query'])) {
         $products[] = $product;
     }
 
-    // Trả về HTML của kết quả tìm kiếm
+    // Trả về HTML của kết quả tìm kiếm - live search
     if (count($products) > 0) {
         foreach ($products as $product) {
             echo '<table class="table text-nowrap align-middle mb-0">
