@@ -48,6 +48,57 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_to_bill'])) {
     $_SESSION['total_bill'] += $quantity * $product['price_sell'];
 }
 
+// Kiểm tra nếu có yêu cầu cập nhật số lượng
+if (isset($_POST['update_quantity'])) {
+  $product_id = $_POST['product_id'];
+  $new_quantity = $_POST['quantity'];
+
+  // Kiểm tra xem số lượng có hợp lệ không
+  if (is_numeric($new_quantity) && $new_quantity > 0) {
+      // Duyệt qua giỏ hàng và cập nhật số lượng
+      foreach ($_SESSION['bill'] as $key => $item) {
+          if ($item['product_id'] == $product_id) {
+              $_SESSION['bill'][$key]['quantity'] = $new_quantity;
+              $_SESSION['bill'][$key]['total'] = $item['price_sell'] * $new_quantity; // Cập nhật tổng tiền
+              break;
+          }
+      }
+
+      // Cập nhật lại tổng tiền của Bill
+      $_SESSION['total_bill'] = 0;
+      foreach ($_SESSION['bill'] as $item) {
+          $_SESSION['total_bill'] += $item['total'];
+      }
+  }
+
+  // Redirect lại trang Bill
+  header("Location: staff"); // Điều hướng lại trang bill.php (hoặc trang hiện tại)
+  exit();
+}
+
+// Kiểm tra nếu có yêu cầu xóa sản phẩm
+if (isset($_POST['remove_product'])) {
+  $product_id = $_POST['product_id'];
+
+  // Duyệt qua giỏ hàng và xóa sản phẩm
+  foreach ($_SESSION['bill'] as $key => $item) {
+      if ($item['product_id'] == $product_id) {
+          unset($_SESSION['bill'][$key]); // Xóa sản phẩm khỏi giỏ hàng
+          break;
+      }
+  }
+
+  // Cập nhật lại tổng tiền của Bill
+  $_SESSION['total_bill'] = 0;
+  foreach ($_SESSION['bill'] as $item) {
+      $_SESSION['total_bill'] += $item['total'];
+  }
+
+  // Redirect lại trang Bill
+  header("Location: staff"); // Điều hướng lại trang bill.php (hoặc trang hiện tại)
+  exit();
+}
+
 // Xử lý thanh toán
 if (isset($_POST['pay_bill'])) {
     if (!empty($_SESSION['bill'])) {
@@ -290,52 +341,130 @@ $role_id = isset($_SESSION['role_id']) ? $_SESSION['role_id'] : null;
               </div>
               <!-- card-2  -->
               <div class="card">
-                <h2 class="card-title fw-semibold mb-4">Bill của bạn</h2>
-                <div class="card-body">
-                  <table class="table text-nowrap align-middle mb-0">
+                  <h2 class="card-title fw-semibold mb-4">Bill của bạn</h2>
+                  <div class="card-body">
+                    <table class="table text-nowrap align-middle mb-0">
                       <thead>
-                          <tr class="border-2 border-bottom border-primary border-0">
-                              <th scope="col" class="text-center">Mã sản phẩm</th>
-                              <th scope="col" class="text-center">Tên sản phẩm</th>
-                              <th scope="col" class="text-center">Giá bán</th>
-                              <th scope="col" class="text-center">Số lượng</th>
-                              <th scope="col" class="text-center">Tổng</th>
-                          </tr>
+                        <tr class="border-2 border-bottom border-primary border-0">
+                          <th scope="col" class="text-center">Mã sản phẩm</th>
+                          <th scope="col" class="text-center">Tên sản phẩm</th>
+                          <th scope="col" class="text-center">Giá bán</th>
+                          <th scope="col" class="text-center">Số lượng</th>
+                          <th scope="col" class="text-center">Tổng</th>
+                          <th scope="col" class="text-center">Hành động</th> <!-- Cột hành động -->
+                        </tr>
                       </thead>
                       <tbody class="table-group-divider">
-                          <?php if (!empty($_SESSION['bill'])): ?>
-                              <?php foreach ($_SESSION['bill'] as $item): ?>
-                                  <tr>
-                                      <td scope="row" class="text-center fw-medium"><?php echo htmlspecialchars($item['product_code']); ?></td>
-                                      <td scope="row" class="text-center fw-medium"><?php echo htmlspecialchars($item['product_name']); ?></td>
-                                      <td scope="row" class="text-center fw-medium"><?php echo number_format($item['price_sell']); ?> ₫</td>
-                                      <td scope="row" class="text-center fw-medium"><?php echo htmlspecialchars($item['quantity']); ?></td>
-                                      <td scope="row" class="text-center fw-medium"><?php echo number_format($item['total']); ?> ₫</td>
-                                  </tr>
-                              <?php endforeach; ?>
-                              <tr>
-                                  <td colspan="4">Tổng cộng:</td>
-                                  <td><?php echo number_format($_SESSION['total_bill']); ?> ₫</td>
-                              </tr>
-                          <?php else: ?>
-                              <tr>
-                                  <td colspan="5">Bill trống.</td>
-                              </tr>
-                          <?php endif; ?>
+                        <?php if (!empty($_SESSION['bill'])): ?>
+                          <?php foreach ($_SESSION['bill'] as $key => $item): ?>
+                            <tr>
+                              <td scope="row" class="text-center fw-medium"><?php echo htmlspecialchars($item['product_code']); ?></td>
+                              <td scope="row" class="text-center fw-medium"><?php echo htmlspecialchars($item['product_name']); ?></td>
+                              <td scope="row" class="text-center fw-medium"><?php echo number_format($item['price_sell']); ?> ₫</td>
+                              <td scope="row" class="text-center fw-medium">
+                                <!-- Input để sửa số lượng -->
+                                <form action="" method="POST">
+                                  <input type="number" name="quantity" value="<?php echo $item['quantity']; ?>" min="1" required>
+                                  <input type="hidden" name="product_id" value="<?php echo $item['product_id']; ?>">
+                                  <button type="submit" name="update_quantity" class="btn btn-warning btn-sm">Cập nhật</button>
+                                </form>
+                              </td>
+                              <td scope="row" class="text-center fw-medium"><?php echo number_format($item['total']); ?> ₫</td>
+                              <td class="text-center">
+                                <!-- Nút xóa sản phẩm -->
+                                <form action="" method="POST">
+                                  <input type="hidden" name="product_id" value="<?php echo $item['product_id']; ?>">
+                                  <button type="submit" name="remove_product" class="btn btn-danger btn-sm">Xóa</button>
+                                </form>
+                              </td>
+                            </tr>
+                          <?php endforeach; ?>
+                          <tr>
+                            <td colspan="4">Tổng cộng:</td>
+                            <td><?php echo number_format($_SESSION['total_bill']); ?> ₫</td>
+                          </tr>
+                        <?php else: ?>
+                          <tr>
+                            <td colspan="5">Bill trống.</td>
+                          </tr>
+                        <?php endif; ?>
                       </tbody>
-                  </table>
+                    </table>
 
-                  <form action="" method="POST">
-                      <button class="btn btn-success m-1" type="submit" name="pay_bill">Thanh toán</button>
+                    <form action="" method="POST">
+                      <button class="btn btn-primary m-1" type="button" id="open-payment-modal">Tiến hành thanh toán</button>
                       <button class="btn btn-danger m-1" type="submit" name="cancel_bill">Huỷ thanh toán</button>
-                  </form>
+                    </form>
+                  </div>
                 </div>
-              </div>
 
+
+    <!-- Modal -->
+    <div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content print-popup"> <!-- Thêm class 'print-popup' -->
+          <div class="modal-header">
+            <h5 class="modal-title" id="paymentModalLabel">Thông tin thanh toán</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p><strong>Tên cửa hàng:</strong> Khánh Tâm Thiện Đức Dương Mart</p>
+            <p><strong>Ngày thanh toán:</strong> <?php echo date('d/m/Y H:i:s'); ?></p>
+            <h6>THÔNG TIN MUA HÀNG:</h6>
             
+            <table class="table text-nowrap align-middle mb-0">
+              <thead>
+                <tr class="border-2 border-bottom border-primary border-0">
+                  <th scope="col" class="text-center">Mã sản phẩm</th>
+                  <th scope="col" class="text-center">Tên sản phẩm</th>
+                  <th scope="col" class="text-center">Giá bán</th>
+                  <th scope="col" class="text-center">Số lượng</th>
+                  <th scope="col" class="text-center">Tổng</th>
+                </tr>
+              </thead>
+              <tbody class="table-group-divider">
+                <?php if (!empty($_SESSION['bill'])): ?>
+                  <?php foreach ($_SESSION['bill'] as $item): ?>
+                    <tr>
+                      <td scope="row" class="text-center fw-medium"><?php echo htmlspecialchars($item['product_code']); ?></td>
+                      <td scope="row" class="text-center fw-medium"><?php echo htmlspecialchars($item['product_name']); ?></td>
+                      <td scope="row" class="text-center fw-medium"><?php echo number_format($item['price_sell']); ?> ₫</td>
+                      <td scope="row" class="text-center fw-medium"><?php echo htmlspecialchars($item['quantity']); ?></td>
+                      <td scope="row" class="text-center fw-medium"><?php echo number_format($item['total']); ?> ₫</td>
+                    </tr>
+                  <?php endforeach; ?>
+                  <tr>
+                    <td colspan="4">Tổng cộng:</td>
+                    <td><?php echo number_format($_SESSION['total_bill']); ?> ₫</td>
+                  </tr>
+                <?php else: ?>
+                  <tr>
+                    <td colspan="5">Bill trống.</td>
+                  </tr>
+                <?php endif; ?>
+              </tbody>
+            </table>
+
+            <!-- QR code -->
+            <div class="text-center my-3">
+              <img src="./assets/images/QR.png" alt="QR Code" width="250" height="auto">
+            </div>
+
+            <!-- Nút "In bill" và "Thanh toán" -->
+            <div class="d-flex justify-content-between">
+              <button class="btn btn-info" id="print-bill">In bill</button>
+              <form action="staff" method="post">
+                <button class="btn btn-success" type="submit" name="pay_bill">Thanh toán</button>
+              </form>
+            </div>
           </div>
         </div>
+      </div>
     </div>
+
+
+                        
+
     <script src="assets/libs/jquery/dist/jquery.min.js"></script>
     <script src="assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="assets/libs/apexcharts/dist/apexcharts.min.js"></script>
@@ -372,6 +501,17 @@ $role_id = isset($_SESSION['role_id']) ? $_SESSION['role_id'] : null;
         });
         });
     </script>
+    <script>
+      document.getElementById('open-payment-modal').addEventListener('click', function() {
+        var paymentModal = new bootstrap.Modal(document.getElementById('paymentModal'));
+        paymentModal.show();
+      });
+
+      document.getElementById('print-bill').addEventListener('click', function() {
+        window.print(); // In toàn bộ nội dung của pop-up
+      });
+    </script>
+
 </body>
 
 </html>
