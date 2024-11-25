@@ -25,6 +25,26 @@
   <title> PMHT BÁN HÀNG </title>
   <link rel="shortcut icon" type="image/png" href="https://icons.veryicon.com/png/System/Small%20%26%20Flat/shop.png" />
   <link rel="stylesheet" href="assets/css/styles.min.css" />
+  <style>
+         @media print {
+            body * {
+                visibility: hidden; /* Ẩn tất cả các phần tử trong trang */
+            }
+            .print-popup, .print-popup * {
+                visibility: visible; /* Chỉ hiển thị phần tử có class 'print-popup' */
+            }
+            .print-popup {
+                position: absolute;
+                left: 0;
+                top: 0;
+            }
+            /* Ẩn nút in bill và thanh toán khi in */
+            .print-popup .btn-info,
+            .print-popup .btn-success {
+                display: none;
+            }
+        }
+  </style>
 </head>
 
 <?php
