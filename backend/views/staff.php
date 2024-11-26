@@ -447,14 +447,14 @@ $role_id = isset($_SESSION['role_id']) ? $_SESSION['role_id'] : null;
 
             <!-- QR code -->
             <div class="text-center my-3">
-              <img src="./assets/images/QR.png" alt="QR Code" width="250" height="auto">
+            <img src="https://img.vietqr.io/image/MB-446619999-print.png?amount=<?php echo $_SESSION['total_bill']; ?>&addInfo=Thanh toan Vippro mart<?php echo urlencode(date('d/m/Y H:i:s')); ?>&accountName=NGUYEN%20NGOC%20KHANH" alt="QR Code" width="350" height="auto">
             </div>
 
             <!-- Nút "In bill" và "Thanh toán" -->
             <div class="d-flex justify-content-between">
-              <button class="btn btn-info" id="print-bill">In bill</button>
+              <button class="btn btn-info" id="print-bill">1. In bill</button>
               <form action="staff" method="post">
-                <button class="btn btn-success" type="submit" name="pay_bill">Thanh toán</button>
+                <button class="btn btn-success" type="submit" name="pay_bill">2. Thanh toán</button>
               </form>
             </div>
           </div>
