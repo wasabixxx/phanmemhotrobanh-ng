@@ -43,7 +43,7 @@
             .print-popup .btn-success {
                 display: none;
             }
-        }
+        }    
   </style>
 </head>
 

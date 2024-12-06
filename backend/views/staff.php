@@ -412,14 +412,14 @@ $role_id = isset($_SESSION['role_id']) ? $_SESSION['role_id'] : null;
             <p><strong>Ngày thanh toán:</strong> <?php echo date('d/m/Y H:i:s'); ?></p>
             <h6>THÔNG TIN MUA HÀNG:</h6>
             
-            <table class="table text-nowrap align-middle mb-0">
+            <table class="table align-middle mb-0">
               <thead>
                 <tr class="border-2 border-bottom border-primary border-0">
-                  <th scope="col" class="text-center">Mã sản phẩm</th>
-                  <th scope="col" class="text-center">Tên sản phẩm</th>
-                  <th scope="col" class="text-center">Giá bán</th>
-                  <th scope="col" class="text-center">Số lượng</th>
-                  <th scope="col" class="text-center">Tổng</th>
+                  <th scope="col" class="text-center">Ma_SP</th>
+                  <th scope="col" class="text-center">Ten_SP</th>
+                  <th scope="col" class="text-center">Gia</th>
+                  <th scope="col" class="text-center">SL</th>
+                  <th scope="col" class="text-center">Tong</th>
                 </tr>
               </thead>
               <tbody class="table-group-divider">
