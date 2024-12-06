@@ -75,6 +75,57 @@ while ($row = $result_productivity->fetch_assoc()) {
 $time_frame = in_array($time_frame, ['day', 'week', 'month']) ? $time_frame : 'day';
 
 
+// Lấy dữ liệu hàng hóa bán chạy nhất
+$sql_best_selling = "
+    SELECT p.product_name, SUM(s.quantity) AS total_quantity
+    FROM products p
+    JOIN sales s ON p.id = s.product_id
+    WHERE s.sale_time >= 
+        CASE 
+            WHEN '$time_frame' = 'day' THEN CURDATE()
+            WHEN '$time_frame' = 'week' THEN DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+            WHEN '$time_frame' = 'month' THEN DATE_SUB(CURDATE(), INTERVAL 1 MONTH)
+            ELSE CURDATE()
+        END
+    GROUP BY p.id
+    ORDER BY total_quantity DESC
+    LIMIT 10
+";
+
+$result_best_selling = $conn->query($sql_best_selling);
+
+$best_selling_products = [];
+$best_selling_quantities = [];
+
+while ($row = $result_best_selling->fetch_assoc()) {
+    $best_selling_products[] = $row['product_name'];
+    $best_selling_quantities[] = (int)$row['total_quantity'];
+}
+
+// Lấy dữ liệu tồn kho
+$sql_inventory = "
+    SELECT product_name, quantity
+    FROM products
+    WHERE quantity > 0
+    ORDER BY quantity DESC;
+";
+
+$result_inventory = $conn->query($sql_inventory);
+
+if (!$result_inventory) {
+    die("Lỗi truy vấn tồn kho: " . $conn->error);
+}
+
+$product_names = [];
+$stock_quantities = [];
+while ($row = $result_inventory->fetch_assoc()) {
+    $product_names[] = $row['product_name'];
+    $stock_quantities[] = (int)$row['quantity'];
+}
+
+
+
+
 $conn->close();
 ?>
 
@@ -227,6 +278,24 @@ $conn->close();
                 </div>
               </div>
             </div>
+            <div class="col-lg-5">
+              <!-- card3 -->
+              <div class="card">
+                <h2 class="card-title fw-semibold mb-4">Hàng Hóa Bán Chạy Nhất</h2>
+                <div class="card-body">
+                  <canvas id="bestSellingChart" width="400" height="200"></canvas>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-5">
+              <!-- card4 -->
+              <div class="card">
+                  <h2 class="card-title fw-semibold mb-4">Biểu Đồ Tồn Kho</h2>
+                  <div class="card-body">
+                      <canvas id="inventoryChart" width="400" height="200"></canvas>
+                  </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -344,7 +413,99 @@ $conn->close();
             }
         });
 
-    </script>
+      // Dữ liệu biểu đồ hàng hóa bán chạy nhất
+      const bestSellingProducts = <?php echo json_encode($best_selling_products); ?>;
+      const bestSellingQuantities = <?php echo json_encode($best_selling_quantities); ?>;
+
+      const ctx3 = document.getElementById('bestSellingChart').getContext('2d');
+      const bestSellingChart = new Chart(ctx3, {
+          type: 'bar',
+          data: {
+              labels: bestSellingProducts,
+              datasets: [{
+                  label: 'Số Lượng Bán',
+                  data: bestSellingQuantities,
+                  backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                  borderColor: 'rgba(75, 192, 192, 1)',
+                  borderWidth: 1
+              }]
+          },
+          options: {
+              responsive: true,
+              plugins: {
+                  title: {
+                      display: true,
+                      text: 'Hàng Hóa Bán Chạy Nhất'
+                  }
+              },
+              scales: {
+                  x: {
+                      title: {
+                          display: true,
+                          text: 'Tên Hàng Hóa'
+                      }
+                  },
+                  y: {
+                      title: {
+                          display: true,
+                          text: 'Số Lượng Bán'
+                      },
+                      beginAtZero: true
+                  }
+              }
+          }
+        });
+
+        
+        // Dữ liệu biểu đồ tồn kho
+      const inventoryLabels = <?php echo json_encode($product_names); ?>;
+      const inventoryData = <?php echo json_encode($stock_quantities); ?>;
+
+      // Tạo màu sắc ngẫu nhiên cho từng cột
+      const inventoryColors = inventoryLabels.map(() =>
+          `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.6)`
+      );
+
+      const ctx4 = document.getElementById('inventoryChart').getContext('2d');
+      const inventoryChart = new Chart(ctx4, {
+          type: 'bar',
+          data: {
+              labels: inventoryLabels,
+              datasets: [{
+                  label: 'Số lượng tồn kho',
+                  data: inventoryData,
+                  backgroundColor: inventoryColors,
+                  borderColor: inventoryColors.map(color => color.replace('0.6', '1')),
+                  borderWidth: 1
+              }]
+          },
+          options: {
+              responsive: true,
+              plugins: {
+                  title: {
+                      display: true,
+                      text: 'Biểu Đồ Tồn Kho (Sản phẩm có số lượng > 0)'
+                  },
+              },
+              scales: {
+                  x: {
+                      title: {
+                          display: true,
+                          text: 'Tên sản phẩm'
+                      }
+                  },
+                  y: {
+                      title: {
+                          display: true,
+                          text: 'Số lượng'
+                      },
+                      beginAtZero: true
+                  }
+              }
+          }
+      });
+
+  </script>
 </body>
 
 </html>
